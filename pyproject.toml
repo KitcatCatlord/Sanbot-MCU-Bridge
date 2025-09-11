@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sanbot-mcu-bridge"
+version = "1.0.0"
+description = "Sanbot USB MCU bridge and camera helpers (Python)"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Sanbot Dev", email = "dev@example.com" }]
+keywords = ["sanbot", "robot", "usb", "mcu", "zigbee", "camera", "uvc"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "pyusb>=1.2.1",
+  "click>=8.1.7",
+]
+
+[project.optional-dependencies]
+camera = [
+  "opencv-python>=4.5.0",
+  "Flask>=2.3.0",
+]
+dev = [
+  "pytest>=8.2.0",
+]
+
+[project.scripts]
+sanbot-usb = "sanbot.mcu_bridge.usb_bridge:cli"
+sanbot-camera = "sanbot.camera_bridge.camera:cli"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["sanbot*", "toolbox*"]
+exclude = ["tools*", "docs*", "server*", "pi*", "scripts*", "common*"]
+
+[tool.setuptools.package-data]
+"sanbot.mcu_bridge" = [
+  "USAGE.md",
+  "USAGE_LIBRARY.md",
+]

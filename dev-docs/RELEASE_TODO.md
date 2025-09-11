@@ -1,0 +1,93 @@
+This file aggregates the library TODOs for quick reference.
+
+Source of truth is `toolbox/mcu_bridge/TODO.md` in the repo. Snapshot below:
+
+---
+
+```text
+# MCU Manager TODO
+
+- [x] T001: Decompile main-release.apk and locate MainService/MCUManager
+- [x] T002: Extract AIDLs (IMyService, IMyServiceCallback, ZigbeeRemoteService, ZigbeeCallback)
+- [x] T003: Map USB transport (UsbMessageMrg, endpoints, VID/PID)
+- [x] T004: Document key files and protocol (docs/KEY_FILES.md)
+- [x] T005: Scaffold Python USB bridge (toolbox/mcu_bridge/usb_bridge.py)
+- [x] T006: Implement heartbeat command
+- [x] T007: Implement wheels: angle/time/distance
+- [x] T008: Implement LED command (whichLight/switch/rate/random)
+- [x] T009: Implement motor defend (whichPart, enable/disable)
+- [x] T010: Implement projector image setting
+- [x] T011: Implement MCU reset (head/bottom)
+- [x] T012: Implement battery query
+- [x] T013: Write usage guide (toolbox/mcu-manager/USAGE.md)
+- [x] T014: Implement head motion (absolute/relative/time/no-angle)
+- [x] T015: Implement hand/arm motion (angle/time/no-angle)
+- [x] T016: Projector: picture/quality/other settings (brightness, contrast, color, saturation, mirror, trapezoid H/V, acuity, expert axis/phase)
+- [x] T016a: Projector power toggle and status query
+- [x] T016b: Projector quality (contrast/brightness/chroma/saturation/acutance)
+- [x] T016c: Projector output (trapezoid H/V, image setting)
+- [x] T016d: Projector picture (control/sub/degree)
+- [x] T016e: Projector other (switchMode)
+- [x] T016f: Projector type setting
+- [x] T016g: Projector expert command exposed + documented
+  - [x] Projector connection query
+- [x] T017: Sensors: touch switch, PIR, IR distance, obstacle, button, gyro
+- [x] T017a: Gyroscope query
+- [x] T017b: Touch, PIR, obstacle, button queries
+- [x] T017c: IR sender query
+  - [x] IR receive status query
+- [x] T017d: UART connection status
+- [x] T018: Voice location command
+- [x] T018a: Implement voice-location (head angles)
+- [x] T019: MCU upgrade flow: command + packetization for head/bottom, query upgrade status
+- [x] T020: ZigBee control parity with Android (whitelist ops, list/get, allow join, send cmd/bytes, notify readiness, remove/clear/switch)
+ - [x] T020a: Generic ZigBee raw sender (zigbee-send)
+ - [x] T020b: JSON-based ZigBee helpers (allow-join, whitelist ops, remove, list)
+- [x] T021: Query/status: work status, head motor/photocouple abnormal, bottom encoder, battery temperature, 3D detect, MCU version
+- [x] T021a: Battery temperature
+- [x] T021b: Work status
+- [x] T021c: Bottom encoder connection
+- [x] T021d: MCU version (head/bottom)
+- [x] T021e: Head motor abnormal query
+- [x] T021f: Photoelectric abnormal query
+- [x] T021g: 3D detect data
+  - [x] SPI flash status
+  - [x] Optocoupler status
+  - [x] Expression version query
+- [x] T022: Projector: power switch, query data
+- [x] T022a: Implement projector power switch and query
+- [x] T023: Motion modes: follow/wander/charge/ganyazi switches and status
+- [x] T023a: Follow/Wander/Hide toggles
+- [x] T023b: Auto-charge toggle (threshold optional)
+- [x] T023c: Charge pile ops + status (send + listener decode)
+- [x] T024: System ops: white light level, black shield, LED switches, dance mode, go home, show face emotion, main service version
+ - [x] T024a: Dance mode toggle
+ - [x] T024b: Normal expression + version set
+ - [x] T024c: Go home / recover position
+ - [x] T024d: Speaker toggle
+ - ~~T024e: Main service version (Android-side; not via MCU)~~
+- [x] T031: Camera module: list/preview/snapshot/stream
+  - [x] T031a: CLI tool (OpenCV/Flask) with list/preview/snapshot/MJPEG stream
+  - [x] T031b: Library class `Camera` with open/read/frames/close
+  - [x] T031c: Documentation (toolbox/camera_bridge/README.md)
+- [x] T025: Inbound read/parse for reports and async events; map to callbacks
+ - [x] T025a: Add CLI live listener and USB frame parser
+ - [x] T025b: Add structured decoders for common inbound payloads (listen --verbose)
+ - [x] T025c: Library event callbacks + background listeners (Sanbot.on/start_listening)
+- [x] T026: Python library API (classes) alongside CLI
+ - [x] T026a: Full library with high-level API (Sanbot)
+ - [x] T026b: Add rich docstrings/hover descriptions for library APIs
+- [x] T026c: Wire CLI with retries/logging (global --log-level/--retries)
+- [x] T027: Logging, retries, USB reconnects
+- [x] T027a: Add configurable logging + retry wrappers for bulk I/O
+- [x] T028: Safety: parameter validation, motion constraints
+- [ ] T029: Unit tests for payload builders
+- [x] T029a: Add tests for basic payload/frame builders
+- [x] T030: Packaging (setuptools/poetry) and CI hooks
+ - [x] T030a: Package library and CLI as a distributable, with entry points
+- [x] T031: Stricter location‑labeled sensor decoders
+  - [x] T031a: Wire documentation for sensor mappings (USAGE_LIBRARY.md)
+- [x] T032: Write comprehensive and easy-to-understand documentation for the complete library
+- [x] T033: Check for any missing functionality from the original .smali files
+  - [x] T033a: Check for any issues such as bugs or wrongly implemented logic
+```
