@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: sanbot-mcu-bridge
+Version: 2.0.0
+Summary: Sanbot USB MCU bridge and camera/audio helpers (Python)
+Author-email: Sanbot Dev <dev@example.com>
+Keywords: sanbot,robot,usb,mcu,zigbee,camera,uvc,audio,alsa
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: pyusb>=1.2.1
+Requires-Dist: click>=8.1.7
+Provides-Extra: camera
+Requires-Dist: opencv-python>=4.5.0; extra == "camera"
+Requires-Dist: Flask>=2.3.0; extra == "camera"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.2.0; extra == "dev"
+Provides-Extra: audio
+Requires-Dist: sounddevice>=0.4.6; extra == "audio"
+Requires-Dist: soundfile>=0.12.1; extra == "audio"
+Requires-Dist: Flask>=2.3.0; extra == "audio"
+
+# sanbot-mcu-bridge
+
+A Python library and CLI to control Sanbot Elf S1-B2 MCUs directly over USB (no Android).
+It mirrors the original USB framing and covers wheels, motion,
+LEDs, projector, sensors, ZigBee, and firmware upgrade.
+
+## Install
+```
+pip install sanbot-mcu-bridge
+```
+
+## Quick start (library)
+```
+from sanbot.mcu_bridge.lib import Sanbot
+bot = Sanbot()
+bot.open()
+bot.wheels_time('forward', ms=800)
+bot.close()
+```
+
+## Quick start (CLI)
+```
+sanbot-usb list
+sanbot-usb listen --target bottom --verbose
+```
+
+- Camera CLI: `sanbot-camera` (list/preview/snapshot/stream)
+- Safety: conservative motion limits; bypass with `Sanbot(unsafe=True)` or `--unsafe` in CLI.
+
+## Docs
+- Basic usage docs are bundled in the wheel:
+  - `sanbot/mcu_bridge/USAGE.md`
+  - `sanbot/mcu_bridge/USAGE_LIBRARY.md`
+- Deep protocol docs (smali references, hardware maps) live in the development repo.
+
+## Changelog
+See `CHANGELOG.md` for release notes.
+
+## Notes from the dev
+I'd just like to note that ChatGPT Codex *was* used in this project, but it was used almost exclusively for: documentation, TODO compression, searching original firmware for files, packaging project as a library. The core functionality was pretty much exclusively written by me, @KitcatCatlord.
+This was initially written in a separate private project, so I could easily reference files I am not able to make public. If it seems unrealistic that I did all of this in one commit - it is, it was done over many sessions.
+
+## License
+This repository is currently unlicensed.
+You may view the code, but you do not have permission to use, modify, or redistribute it outside GitHub.
