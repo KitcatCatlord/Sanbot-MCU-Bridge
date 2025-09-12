@@ -11,3 +11,8 @@ All notable changes to this project’s Python library are documented here.
 - Background listener with decoded events; high-level `Sanbot` API.
 - CI workflow for tests; packaging metadata and extras (`camera`, `dev`).
 - Documentation: usage guides and conformance notes (in repo only; not bundled with wheel).
+
+## [2.0.0] - 2025-09-11
+- Added audio bridge (Linux/ALSA): CLI and library to list/preview/record/stream microphone audio.
+- New console script: `sanbot-audio`.
+- Bundled audio usage docs under `sanbot/mcu_bridge/USAGE_AUDIO.md`.
