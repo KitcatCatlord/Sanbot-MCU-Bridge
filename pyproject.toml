@@ -32,6 +32,13 @@ audio = [
   "soundfile>=0.12.1",
   "Flask>=2.3.0",
 ]
+tester = [
+  "PySide6>=6.6.0",
+  "pyqtgraph>=0.13.0",
+  "numpy>=1.21.0",
+  "opencv-python>=4.5.0",
+  "sounddevice>=0.4.6",
+]
 
 [project.scripts]
 sanbot-usb = "sanbot.mcu_bridge.usb_bridge:cli"
