@@ -8,7 +8,14 @@ hardware or validating firmware changes.
 
 ## Installation
 
-Install the tester extras to pull in the GUI and media dependencies:
+On Raspberry Pi you can run the helper script (installs APT packages, creates
+`.venv`, and installs the tester extras):
+
+```
+./programs/setup_pi_tester.sh
+```
+
+If you prefer manual installation, install the tester extras directly:
 
 ```
 pip install .[tester]

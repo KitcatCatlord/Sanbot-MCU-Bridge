@@ -33,7 +33,8 @@ sanbot-usb listen --target bottom --verbose
   - `sanbot/mcu_bridge/USAGE_LIBRARY.md`
 - Deep protocol docs (smali references, hardware maps) live in the development repo.
 - GUI tester: see `usage-docs/USB_BRIDGE_TESTER.md` for the interactive bridge
-  test bench with camera/microphone/USB monitoring.
+  test bench with camera/microphone/USB monitoring (includes
+  `programs/setup_pi_tester.sh` to prep a Raspberry Pi).
 
 ## Changelog
 See `CHANGELOG.md` for release notes.
