@@ -42,13 +42,28 @@ def claim_bulk_endpoints(dev: usb.core.Device | None) -> USBEndpoints:
         raise click.ClickException("Device not found; ensure the Sanbot MCU is connected and powered")
     if isinstance(dev, Abort):
         raise dev
-    dev.set_configuration()
+    try:
+        dev.set_configuration()
+    except usb.core.USBError as exc:
+        raise click.ClickException(f"Failed to configure USB device: {exc}") from exc
     cfg = dev.get_active_configuration()
     # Iterate interfaces; pick first one with bulk in/out endpoints
     ep_out = ep_in = None
     intf = None
     for i in cfg:
         intf = i
+        intf_num = intf.bInterfaceNumber
+        try:
+            if dev.is_kernel_driver_active(intf_num):
+                try:
+                    dev.detach_kernel_driver(intf_num)
+                    LOG.debug("Detached kernel driver from interface %d", intf_num)
+                except usb.core.USBError as exc:
+                    raise click.ClickException(
+                        f"Kernel driver in use on interface {intf_num}: {exc}"
+                    ) from exc
+        except NotImplementedError:
+            pass
         for ep in i:
             # bmAttributes lower bits 0x02 = bulk; bEndpointAddress bit7 = direction
             is_bulk = (ep.bmAttributes & 0x03) == 0x02
@@ -61,12 +76,15 @@ def claim_bulk_endpoints(dev: usb.core.Device | None) -> USBEndpoints:
             break
     if ep_out is None or ep_in is None:
         raise RuntimeError("Failed to find bulk in/out endpoints")
-    usb.util.claim_interface(dev, intf)
+    try:
+        usb.util.claim_interface(dev, intf)
+    except usb.core.USBError as exc:
+        raise click.ClickException(f"Unable to claim USB interface: {exc}") from exc
     return USBEndpoints(dev, cfg, intf, ep_out, ep_in)
 
 
 def short_to_bytes(val: int) -> bytes:
-    return struct.pack('>h', val)  # big-endian signed short
+    return struct.pack('>H', val & 0xFFFF)  # big-endian unsigned short
 
 
 def int_to_bytes(val: int) -> bytes:
