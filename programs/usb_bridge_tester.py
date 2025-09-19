@@ -900,15 +900,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.command_executor.failed.connect(self._append_log)
 
     def _setup_hotkeys(self) -> None:
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self, activated=self.command_panel._execute)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Enter"), self, activated=self.command_panel._execute)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+K"), self, activated=self._start_camera)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+M"), self, activated=self._start_mic)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+U"), self, activated=self._start_usb)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+R"), self, activated=self._start_recording)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Shift+R"), self, activated=self._stop_recording)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+L"), self, activated=self._apply_cli_settings)
-        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Shift+E"), self, activated=self._emergency_stop)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Return"), self, activated=self.command_panel._execute)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Enter"), self, activated=self.command_panel._execute)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+K"), self, activated=self._start_camera)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+M"), self, activated=self._start_mic)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+U"), self, activated=self._start_usb)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+R"), self, activated=self._start_recording)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Shift+R"), self, activated=self._stop_recording)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+L"), self, activated=self._apply_cli_settings)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Shift+E"), self, activated=self._emergency_stop)
 
     def _apply_cli_settings(self) -> None:
         self.cli_log_level = self.log_level_combo.currentText()

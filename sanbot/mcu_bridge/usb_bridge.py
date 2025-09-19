@@ -4,6 +4,7 @@ import struct
 import time
 import logging
 import click
+from click.exceptions import Abort
 
 from .lib.safety import SafetyValidator
 
@@ -36,7 +37,11 @@ def find_device(vid, pid) -> usb.core.Device | None:
     return usb.core.find(idVendor=vid, idProduct=pid)
 
 
-def claim_bulk_endpoints(dev: usb.core.Device) -> USBEndpoints:
+def claim_bulk_endpoints(dev: usb.core.Device | None) -> USBEndpoints:
+    if dev is None:
+        raise click.ClickException("Device not found; ensure the Sanbot MCU is connected and powered")
+    if isinstance(dev, Abort):
+        raise dev
     dev.set_configuration()
     cfg = dev.get_active_configuration()
     # Iterate interfaces; pick first one with bulk in/out endpoints
@@ -1644,8 +1649,8 @@ def hand():
 
 @hand.command('angle')
 @click.option('--which', type=int, required=True, help='which hand: 0=both,1=left,2=right (typical)')
-@click.option('--mode', type=int, required=True, help='mode 0x02/0x03')
-@click.option('--direction', type=int, required=True, help='direction code')
+@click.option('--mode', type=int, default=0x02, show_default=True, help='angle mode (0x02 or 0x03 depending on axis)')
+@click.option('--direction', '--dir', 'direction', type=int, required=True, help='direction code')
 @click.option('--speed', type=int, required=True)
 @click.option('--deg', type=int, required=True)
 def hand_angle(which: int, mode: int, direction: int, speed: int, deg: int):

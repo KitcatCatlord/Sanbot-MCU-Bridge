@@ -41,6 +41,13 @@ From the repository root:
 python programs/usb_bridge_tester.py
 ```
 
+For a hardware-free dry run (synthetic camera/audio/USB data), launch the demo
+variant:
+
+```
+python programs/usb_bridge_tester_demo.py
+```
+
 ## Layout overview
 
 - **Command panel (left)** – Tree of every Click command/group defined in
