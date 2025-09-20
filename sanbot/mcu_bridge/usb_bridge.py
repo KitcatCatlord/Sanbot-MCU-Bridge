@@ -114,7 +114,8 @@ def build_usb_frame(datas: bytes, ack_flag: int = 0x01) -> bytes:
     data_sum += ((mmnn >> 8) & 0xFF)
     for b in datas:
         data_sum += b
-    checksum = struct.pack('b', data_sum & 0xFF)
+    # checksum is 1-byte sum truncated to 8 bits; pack as unsigned
+    checksum = struct.pack('B', data_sum & 0xFF)
 
     buf = bytearray()
     buf += short_to_bytes(type_short)
