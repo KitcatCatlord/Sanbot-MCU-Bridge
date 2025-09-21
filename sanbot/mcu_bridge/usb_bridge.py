@@ -3,6 +3,9 @@ import sys
 import struct
 import time
 import logging
+import errno
+import threading
+import atexit
 import click
 from click.exceptions import Abort
 
@@ -110,8 +113,7 @@ def build_usb_frame(datas: bytes, ack_flag: int = 0x01) -> bytes:
     data_sum += fh[0]
     data_sum += fh[1]
     data_sum += (ack_flag & 0xFF)
-    data_sum += (mmnn & 0xFF)
-    data_sum += ((mmnn >> 8) & 0xFF)
+    data_sum += (mmnn & 0xFFFF)
     for b in datas:
         data_sum += b
     # checksum is 1-byte sum truncated to 8 bits; pack as unsigned
@@ -142,6 +144,13 @@ def heartbeat_payload(switch_mode: int = 1, lsb: int = 0, msb: int = 0) -> bytes
 CLI_RETRIES = 1
 CLI_SAFETY = SafetyValidator()
 LOG = logging.getLogger("mcu_bridge")
+USB_SEND_LOCK = threading.Lock()
+
+CLI_AUTO_READ = True
+CLI_READ_TIMEOUT_MS = 300
+CLI_AUTO_HEARTBEAT = True
+CLI_HEARTBEAT_INTERVAL_MS = 1500
+CLI_HEARTBEAT_HEAD = False
 
 
 def send_bulk(ep_out, data: bytes, timeout_ms: int = 1000) -> int:
@@ -158,6 +167,31 @@ def send_bulk(ep_out, data: bytes, timeout_ms: int = 1000) -> int:
             time.sleep(0.05)
     assert last_err is not None
     raise last_err
+
+
+def send_command(eps: USBEndpoints, data: bytes, *, label: str | None = None,
+                 expect_response: bool | None = None,
+                 read_timeout_ms: int | None = None) -> int:
+    with USB_SEND_LOCK:
+        wrote = send_bulk(eps.ep_out, data)
+        should_read = CLI_AUTO_READ if expect_response is None else bool(expect_response)
+        if should_read and eps.ep_in is not None:
+            timeout = read_timeout_ms if read_timeout_ms is not None else CLI_READ_TIMEOUT_MS
+            _maybe_auto_read(eps, label=label, timeout_ms=timeout)
+        return wrote
+
+
+def release_endpoints(eps: USBEndpoints | None) -> None:
+    if eps is None:
+        return
+    try:
+        usb.util.release_interface(eps.dev, eps.intf)
+    except Exception:
+        pass
+    try:
+        usb.util.dispose_resources(eps.dev)
+    except Exception:
+        pass
 
 
 # ----- Safety / validation helpers -----
@@ -359,9 +393,20 @@ def _decode_known_datas(datas: bytes) -> dict | None:
 @click.option('--log-level', default='WARNING', type=click.Choice(['DEBUG','INFO','WARNING','ERROR','CRITICAL']))
 @click.option('--retries', default=1, type=int, help='USB write retries on failure')
 @click.option('--unsafe/--safe', 'unsafe', default=False, help='Disable safety checks (not recommended)')
-def cli(log_level: str, retries: int, unsafe: bool):
+@click.option('--auto-read/--no-auto-read', default=True, help='Read one response frame after each command when possible')
+@click.option('--read-timeout', default=300, type=int, help='Response read timeout (ms) when auto-read is enabled')
+@click.option('--auto-heartbeat/--no-auto-heartbeat', default=True, help='Send periodic heartbeats while the CLI is running')
+@click.option('--heartbeat-interval', default=1500, type=int, help='Heartbeat interval in milliseconds')
+@click.option('--heartbeat-head/--no-heartbeat-head', default=False, help='Include head MCU in auto heartbeat loop')
+def cli(log_level: str, retries: int, unsafe: bool, auto_read: bool, read_timeout: int,
+        auto_heartbeat: bool, heartbeat_interval: int, heartbeat_head: bool):
     """Sanbot USB MCU bridge (experimental)."""
     global CLI_RETRIES
+    global CLI_AUTO_READ
+    global CLI_READ_TIMEOUT_MS
+    global CLI_AUTO_HEARTBEAT
+    global CLI_HEARTBEAT_INTERVAL_MS
+    global CLI_HEARTBEAT_HEAD
     CLI_RETRIES = max(1, retries)
     logging.basicConfig(level=getattr(logging, log_level))
     LOG.setLevel(getattr(logging, log_level))
@@ -370,6 +415,16 @@ def cli(log_level: str, retries: int, unsafe: bool):
     except Exception:
         # Safety validator not critical for CLI init
         pass
+    CLI_AUTO_READ = bool(auto_read)
+    CLI_READ_TIMEOUT_MS = max(1, read_timeout)
+    CLI_AUTO_HEARTBEAT = bool(auto_heartbeat)
+    CLI_HEARTBEAT_INTERVAL_MS = max(100, heartbeat_interval)
+    CLI_HEARTBEAT_HEAD = bool(heartbeat_head)
+    HEARTBEAT_MANAGER.configure(
+        enabled=CLI_AUTO_HEARTBEAT,
+        interval_ms=CLI_HEARTBEAT_INTERVAL_MS,
+        head_enabled=CLI_HEARTBEAT_HEAD,
+    )
 
 
 # ----- YMODEM helpers for MCU upgrade -----
@@ -466,7 +521,7 @@ def heartbeat(target: str, switch_mode: int):
     frame = build_usb_frame(datas, ack_flag=1)
     # Append point tag as in app wrappers
     frame += struct.pack('B', point_tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Sent heartbeat to {target} ({wrote} bytes)")
 
 
@@ -518,7 +573,7 @@ def wheels_angle(direction: str, speed: int, deg: int):
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Wheels angle {direction} sent ({wrote} bytes)")
 
 
@@ -535,7 +590,7 @@ def wheels_time(direction: str, speed: int, ms: int, circle: bool):
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Wheels time {direction} {ms}ms sent ({wrote} bytes)")
 
 
@@ -551,7 +606,7 @@ def wheels_distance(direction: str, speed: int, mm: int):
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Wheels distance {direction} {mm}mm sent ({wrote} bytes)")
 
 
@@ -592,7 +647,7 @@ def led_cmd(which_light: int, switch_mode: int, rate: int, random_count: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"LED command sent (which=0x{which_light:02X}) ({wrote} bytes)")
 
 
@@ -610,7 +665,7 @@ def projector_image(control_content: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector image command sent ({wrote} bytes)")
 
 
@@ -626,7 +681,7 @@ def projector_power(switch_on: bool):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector power {'on' if switch_on else 'off'} sent ({wrote} bytes)")
 
 
@@ -641,7 +696,7 @@ def projector_status():
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector status query sent ({wrote} bytes)")
 
 
@@ -652,7 +707,7 @@ def projector_connection():
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector connection query sent ({wrote} bytes)")
 
 
@@ -671,12 +726,12 @@ def _upgrade_send_stream(dev_pid: int, tag: int, file_path: str, block_size: int
     eps = claim_bulk_endpoints(dev)
     # Step 0: broadcast upgrade command to prepare
     prep = build_usb_frame(bytes([0x04, 0x0B, 0x01])) + struct.pack('B', 0x03)
-    send_bulk(eps.ep_out, prep)
+    send_command(eps, prep)
     time.sleep(0.05)
     # Step 1: send filename header
     hdr = ymodem_file_header(fname, fsize)
     frame = build_usb_frame(hdr) + struct.pack('B', tag)
-    send_bulk(eps.ep_out, frame)
+    send_command(eps, frame)
     # Step 2: send data blocks
     index = 1
     sent = 0
@@ -687,13 +742,13 @@ def _upgrade_send_stream(dev_pid: int, tag: int, file_path: str, block_size: int
                 break
             blk = ymodem_data_block(index, chunk, block_size)
             frame = build_usb_frame(blk) + struct.pack('B', tag)
-            send_bulk(eps.ep_out, frame)
+            send_command(eps, frame)
             sent += len(chunk)
             index += 1
     # Step 3: send empty packet to finish
     fin = ymodem_empty_packet()
     frame = build_usb_frame(fin) + struct.pack('B', tag)
-    send_bulk(eps.ep_out, frame)
+    send_command(eps, frame)
 
 
 @upgrade.command('start')
@@ -720,7 +775,7 @@ def upgrade_status(up_type: str):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Upgrade status query sent ({wrote} bytes)")
 
 
@@ -735,7 +790,7 @@ def movement_status(which_part: int, status: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Movement status query sent ({wrote} bytes)")
 
 
@@ -757,7 +812,7 @@ def projector_quality(contrast: int, brightness: int, chroma_u: int, chroma_v: i
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector quality set ({wrote} bytes)")
 
 
@@ -771,7 +826,7 @@ def projector_output(proj_setting: int, h_tilt: int, v_tilt: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector output set ({wrote} bytes)")
 
 
@@ -785,7 +840,7 @@ def projector_picture(control: int, sub_type: int, degree: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector picture set ({wrote} bytes)")
 
 
@@ -797,7 +852,7 @@ def projector_other(switch_mode: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector other set ({wrote} bytes)")
 
 
@@ -809,7 +864,7 @@ def projector_type(proj_type: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector type set ({wrote} bytes)")
 
 
@@ -836,7 +891,7 @@ def motor_defend(which_part: int, enable: bool):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Motor defend {'enable' if enable else 'disable'} sent ({wrote} bytes)")
 
 
@@ -857,7 +912,7 @@ def mcu_reset(target: str, time_byte: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"MCU reset ({target}) sent ({wrote} bytes)")
 
 
@@ -875,7 +930,7 @@ def battery_query():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Battery query sent ({wrote} bytes)")
 
 
@@ -886,7 +941,7 @@ def battery_temperature(temp_byte: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Battery temperature query sent ({wrote} bytes)")
 
 
@@ -908,7 +963,7 @@ def gyro_query(accel_status: int, compass_status: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Gyroscope query sent ({wrote} bytes)")
 
 
@@ -937,7 +992,7 @@ def touch_query(touch_turnal: int, touch_info: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Touch query sent ({wrote} bytes)")
 
 
@@ -954,7 +1009,7 @@ def pir_query(pir_type: int, pir_status: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"PIR query sent ({wrote} bytes)")
 
 
@@ -971,7 +1026,7 @@ def obstacle_query(direction: int, distance: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Obstacle query sent ({wrote} bytes)")
 
 
@@ -981,7 +1036,7 @@ def button_status():
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Button status query sent ({wrote} bytes)")
 
 
@@ -992,7 +1047,7 @@ def work_status():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Work status query sent ({wrote} bytes)")
 
 
@@ -1003,7 +1058,7 @@ def encoder_status():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Bottom encoder status query sent ({wrote} bytes)")
 
 
@@ -1016,7 +1071,7 @@ def mcu_version():
         dev = find_device(VID, pid) or click.Abort()
         eps = claim_bulk_endpoints(dev)
         frame = build_usb_frame(datas) + struct.pack('B', tag)
-        wrote = send_bulk(eps.ep_out, frame)
+        wrote = send_command(eps, frame)
         print(f"MCU version query sent to {target} ({wrote} bytes)")
 
 
@@ -1031,7 +1086,7 @@ def head_motor_abnormal(which_part: int, status: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Head motor abnormal query sent ({wrote} bytes)")
 
 
@@ -1045,7 +1100,7 @@ def photocoupler_abnormal(which_part: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Photoelectric abnormal query sent ({wrote} bytes)")
 
 
@@ -1057,7 +1112,7 @@ def detect_3d(distance: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"3D detect query sent ({wrote} bytes)")
 
 
@@ -1068,7 +1123,7 @@ def expression_status():
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Expression status query sent ({wrote} bytes)")
 
 
@@ -1081,7 +1136,7 @@ def dance(enable: bool):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Dance {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1095,7 +1150,7 @@ def projector_expert(adjust_mode: int, control_mode: int, control_content: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Projector expert set ({wrote} bytes)")
 
 
@@ -1108,7 +1163,7 @@ def body_recover(switch_mode: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Body recover command sent ({wrote} bytes)")
 
 
@@ -1120,7 +1175,7 @@ def expression_normal(expression_type: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Expression normal set ({wrote} bytes)")
 
 
@@ -1137,7 +1192,7 @@ def expression_version(hexbytes: str):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Expression version set ({wrote} bytes)")
 
 
@@ -1148,7 +1203,7 @@ def expression_version_query():
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Expression version query sent ({wrote} bytes)")
 
 
@@ -1164,7 +1219,7 @@ def zigbee_send(hexbytes: str):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas, ack_flag=0) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"ZigBee data sent ({wrote} bytes)")
 
 
@@ -1178,7 +1233,7 @@ def _zigbee_send_json(s: str):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas, ack_flag=0) + struct.pack('B', POINT_HEAD)
-    return send_bulk(eps.ep_out, frame)
+    return send_command(eps, frame)
 
 
 @zigbee.command('send-json')
@@ -1248,7 +1303,7 @@ def ir_sender():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"IR sender query sent ({wrote} bytes)")
 
 
@@ -1259,7 +1314,7 @@ def ir_receive_status():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"IR receive status query sent ({wrote} bytes)")
 
 
@@ -1278,7 +1333,7 @@ def ir_sensor(sensor_content: int, sensor_info: int):
     eps = claim_bulk_endpoints(dev)
     # default to broadcast 0x03 per many sensor queries
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"IR sensor command sent ({wrote} bytes)")
 
 
@@ -1289,7 +1344,7 @@ def uart_status():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"UART connection status query sent ({wrote} bytes)")
 
 
@@ -1300,7 +1355,7 @@ def spi_flash_status():
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"SPI flash status query sent ({wrote} bytes)")
 
 
@@ -1318,7 +1373,7 @@ def hide_cat_status(retain: int, status: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Hide-cat status query sent ({wrote} bytes)")
 
 
@@ -1336,7 +1391,7 @@ def hide_obstacle_status(which: int, status: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Hide-obstacle status query sent ({wrote} bytes)")
 
 
@@ -1349,7 +1404,7 @@ def photoelectric_switch(retain_data: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Photoelectric switch query sent ({wrote} bytes)")
 
 
@@ -1363,7 +1418,7 @@ def optocoupler_status(which_part: int):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Optocoupler status query sent ({wrote} bytes)")
 
 
@@ -1375,7 +1430,7 @@ def white_light(level: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"White light level set ({wrote} bytes)")
 
 
@@ -1387,7 +1442,7 @@ def speaker(enable: bool):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Speaker {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1399,7 +1454,7 @@ def black_shield(enable: bool):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Black shield {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1411,7 +1466,7 @@ def follow_switch(enable: bool):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Follow {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1424,7 +1479,7 @@ def wander_switch(enable: bool, wander_type: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Wander {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1440,7 +1495,7 @@ def auto_charge(enable: bool, threshold: int | None):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Auto-charge {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1456,7 +1511,7 @@ def motor_lock(which_part: int, enable: bool):
     dev = find_device(VID, pid) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', tag)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Motor lock {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1473,7 +1528,7 @@ def charge_pile(hexbytes: str):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Charge pile op sent ({wrote} bytes)")
 
 
@@ -1485,7 +1540,7 @@ def hide_mode(enable: bool):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Hide mode {'enabled' if enable else 'disabled'} ({wrote} bytes)")
 
 
@@ -1500,7 +1555,7 @@ def voice_location(hdeg: int, vdeg: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Voice location command sent ({wrote} bytes)")
 
 
@@ -1513,7 +1568,7 @@ def auto_report(switch_mode: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', 0x03)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Auto-report set to {switch_mode} ({wrote} bytes)")
 
 
@@ -1567,7 +1622,7 @@ def head_absolute(hdeg: int, vdeg: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Head absolute sent ({wrote} bytes)")
 
 
@@ -1581,7 +1636,7 @@ def head_relative(hdir: int, hdeg: int, vdir: int, vdeg: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Head relative sent ({wrote} bytes)")
 
 
@@ -1599,7 +1654,7 @@ def head_angle(axis: str, direction: int, speed: int, deg: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Head angle sent ({wrote} bytes)")
 
 
@@ -1614,7 +1669,7 @@ def head_time(direction: int, ms: int, deg_or_flag: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Head time sent ({wrote} bytes)")
 
 
@@ -1628,7 +1683,7 @@ def head_noangle(direction: int, speed: int):
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Head no-angle sent ({wrote} bytes)")
 
 
@@ -1681,7 +1736,7 @@ def hand_angle(which: int, mode: int, direction: int, speed: int, deg: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Hand angle sent ({wrote} bytes)")
 
 
@@ -1698,7 +1753,7 @@ def hand_time(which: int, ms: int, deg: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Hand time sent ({wrote} bytes)")
 
 
@@ -1714,7 +1769,7 @@ def hand_noangle(which: int, direction: int, speed: int):
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
-    wrote = send_bulk(eps.ep_out, frame)
+    wrote = send_command(eps, frame)
     print(f"Hand no-angle sent ({wrote} bytes)")
 
 
@@ -1751,20 +1806,109 @@ def parse_usb_frame(buf: bytes):
     }
 
 
+def _maybe_auto_read(eps: USBEndpoints, *, label: str | None = None, timeout_ms: int = CLI_READ_TIMEOUT_MS) -> None:
+    if eps.ep_in is None:
+        return
+    timeout = max(1, timeout_ms)
+    try:
+        data = eps.ep_in.read(eps.ep_in.wMaxPacketSize, timeout)
+    except usb.core.USBError as exc:  # type: ignore[attr-defined]
+        err_no = getattr(exc, 'errno', None)
+        if err_no in (errno.ETIMEDOUT, errno.EAGAIN, 110, 60):
+            return
+        LOG.debug("USB auto-read error: %s", exc)
+        return
+    except Exception as exc:  # pragma: no cover - defensive
+        LOG.debug("USB auto-read unexpected error: %s", exc)
+        return
+    payload = bytes(data)
+    if not payload:
+        return
+    prefix = label or "response"
+    print(f"<- {prefix}: len={len(payload)} hex={payload.hex()}")
+    parsed = parse_usb_frame(payload)
+    if parsed and parsed.get('datas'):
+        decoded = _decode_known_datas(parsed['datas'])
+        if decoded:
+            print(f"   decoded: {decoded}")
+
+
+class HeartbeatManager:
+    def __init__(self):
+        self.enabled = False
+        self.head_enabled = False
+        self.interval_ms = 1500
+        self._thread: threading.Thread | None = None
+        self._stop_event = threading.Event()
+
+    def configure(self, *, enabled: bool, interval_ms: int, head_enabled: bool) -> None:
+        self.enabled = enabled
+        self.head_enabled = head_enabled
+        self.interval_ms = max(100, interval_ms)
+        if enabled:
+            self.start()
+        else:
+            self.stop()
+
+    def start(self) -> None:
+        if not self.enabled:
+            return
+        if self._thread and self._thread.is_alive():
+            return
+        self._stop_event.clear()
+        self._thread = threading.Thread(target=self._run, name="sanbot-heartbeat", daemon=True)
+        self._thread.start()
+
+    def stop(self) -> None:
+        self._stop_event.set()
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=1.0)
+        self._thread = None
+
+    def _run(self) -> None:
+        while not self._stop_event.wait(self.interval_ms / 1000.0):
+            self._heartbeat_cycle('bottom', PID_BOTTOM, POINT_BOTTOM)
+            if self.head_enabled:
+                self._heartbeat_cycle('head', PID_HEAD, POINT_HEAD)
+
+    def _heartbeat_cycle(self, label: str, pid: int, point_tag: int) -> None:
+        dev = find_device(VID, pid)
+        if dev is None:
+            return
+        eps = None
+        try:
+            eps = claim_bulk_endpoints(dev)
+            datas = heartbeat_payload()
+            frame = build_usb_frame(datas, ack_flag=1) + struct.pack('B', point_tag)
+            send_command(eps, frame, label=f'heartbeat-{label}', expect_response=False)
+        except click.ClickException as exc:
+            LOG.debug("Heartbeat %s skipped: %s", label, exc)
+        except Exception as exc:  # pragma: no cover - defensive
+            LOG.debug("Heartbeat %s unexpected error: %s", label, exc)
+        finally:
+            release_endpoints(eps)
+
+
+HEARTBEAT_MANAGER = HeartbeatManager()
+atexit.register(HEARTBEAT_MANAGER.stop)
+
+
 @cli.command('listen')
 @click.option('--target', type=click.Choice(['bottom', 'head']), default='bottom')
 @click.option('--timeout', type=int, default=1000, help='read timeout ms')
 @click.option('--verbose', is_flag=True, help='verbose/decoded output')
 def listen(target: str, timeout: int, verbose: bool):
     pid = PID_BOTTOM if target == 'bottom' else PID_HEAD
-    dev = find_device(VID, pid)
-    if dev is None:
-        raise click.ClickException(f"Device not found: VID=0x{VID:04X} PID=0x{pid:04X}")
-    eps = claim_bulk_endpoints(dev)
     buf = bytearray()
     print(f"Listening on {target} MCU (Ctrl-C to stop)...")
     while True:
+        dev = find_device(VID, pid)
+        if dev is None:
+            time.sleep(0.5)
+            continue
+        eps = None
         try:
+            eps = claim_bulk_endpoints(dev)
             chunk = eps.ep_in.read(eps.ep_in.wMaxPacketSize, timeout)
             if chunk:
                 buf.extend(bytearray(chunk))
@@ -1796,18 +1940,10 @@ def listen(target: str, timeout: int, verbose: bool):
         except usb.core.USBTimeoutError:
             continue
         except Exception as e:
-            LOG.warning("listen read error on %s: %s; attempting reconnect", target, e)
-            try:
-                # Re-discover and re-claim endpoints
-                dev = find_device(VID, pid)
-                if dev is not None:
-                    eps = claim_bulk_endpoints(dev)
-                    LOG.info("reconnected to %s MCU", target)
-                else:
-                    time.sleep(0.5)
-            except Exception as re:
-                LOG.error("reconnect failed: %s", re)
-                time.sleep(0.5)
+            LOG.warning("listen read error on %s: %s", target, e)
+            time.sleep(0.2)
+        finally:
+            release_endpoints(eps)
 
 if __name__ == '__main__':
     cli()

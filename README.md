@@ -36,6 +36,8 @@ sanbot-usb listen --target bottom --verbose
   test bench with camera/microphone/USB monitoring. Includes
   `programs/setup_pi_tester.sh` for Raspberry Pi setup and
   `programs/usb_bridge_tester_demo.py` for a hardware-free demo mode.
+- CLI commands now auto-read a response frame (toggle with `--no-auto-read`), so
+  quick queries like `sanbot-usb battery` immediately show decoded data.
 
 ## Changelog
 See `CHANGELOG.md` for release notes.

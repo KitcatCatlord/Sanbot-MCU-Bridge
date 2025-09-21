@@ -12,6 +12,13 @@ if [[ ! -f "pyproject.toml" ]]; then
     exit 1
 fi
 
+if [[ -d .git ]]; then
+    info "Updating git repository (git pull --ff-only)..."
+    git pull --ff-only
+else
+    info "No .git directory detected; skipping git pull."
+fi
+
 APT_PACKAGES=(
     python3-venv
     libusb-1.0-0-dev
@@ -48,8 +55,9 @@ source .venv/bin/activate
 info "Upgrading pip and wheel..."
 pip install --upgrade pip wheel
 
-info "Installing project tester dependencies..."
-pip install .[tester]
+info "Reinstalling project tester dependencies..."
+pip uninstall -y sanbot-mcu-bridge >/dev/null 2>&1 || true
+pip install --upgrade --force-reinstall '.[tester]'
 
 if groups "$USER" | grep -qw plugdev && groups "$USER" | grep -qw audio; then
     info "User already in plugdev and audio groups; skipping group update."
@@ -58,6 +66,17 @@ else
     sudo usermod -aG plugdev,audio "$USER"
     echo "*** Log out and back in (or reboot) for group membership to take effect."
 fi
+
+info "Installing udev rule for Sanbot USB permissions and auto-detach..."
+sudo tee /etc/udev/rules.d/99-sanbot.rules >/dev/null <<'EOF'
+SUBSYSTEM=="usb", ATTR{idVendor}=="0483", ATTR{idProduct}=="5740", MODE="0666", GROUP="plugdev", \
+  RUN+="/bin/sh -c 'echo -n $env{DEVPATH}:1.0 > /sys/bus/usb/drivers/cdc_acm/unbind 2>/dev/null || true'"
+SUBSYSTEM=="usb", ATTR{idVendor}=="0483", ATTR{idProduct}=="5741", MODE="0666", GROUP="plugdev", \
+  RUN+="/bin/sh -c 'echo -n $env{DEVPATH}:1.0 > /sys/bus/usb/drivers/cdc_acm/unbind 2>/dev/null || true'"
+EOF
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+echo "*** Unplug/replug the Sanbot USB cable after this script completes to apply new rules."
 
 cat <<'DONE'
 

@@ -52,7 +52,9 @@ python programs/usb_bridge_tester_demo.py
 
 - **Command panel (left)** – Tree of every Click command/group defined in
   `usb_bridge.py`. Selecting a command exposes all options with type-aware
-  widgets. Use **Ctrl+Enter** to trigger the selected command.
+  widgets. Use **Ctrl+Enter** to trigger the selected command. The underlying
+  CLI auto-reads a single response frame (toggle with `--no-auto-read`), so
+  decoded replies appear immediately in the log pane.
 - **Camera pane (top-right)** – Live preview with selectable device index, and
   start/stop controls. Recording writes MJPEG `.avi` clips under
   `recordings/session_*/camera/`.
