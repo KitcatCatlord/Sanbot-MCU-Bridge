@@ -173,6 +173,9 @@ def send_command(eps: USBEndpoints, data: bytes, *, label: str | None = None,
                  expect_response: bool | None = None,
                  read_timeout_ms: int | None = None) -> int:
     with USB_SEND_LOCK:
+        if CLI_DUMP_TX:
+            prefix = label or 'tx'
+            print(f'-> {prefix}: len={len(data)} hex={data.hex()}')
         wrote = send_bulk(eps.ep_out, data)
         should_read = CLI_AUTO_READ if expect_response is None else bool(expect_response)
         if should_read and eps.ep_in is not None:
