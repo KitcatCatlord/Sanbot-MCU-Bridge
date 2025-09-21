@@ -3,6 +3,8 @@
 
 set -euo pipefail
 
+info() { printf '\n[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
+
 # shellcheck disable=SC2155
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
@@ -34,8 +36,6 @@ APT_PACKAGES=(
     python3-opencv
     unzip
 )
-
-info() { printf '\n[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
 info "Updating APT package index (sudo)..."
 sudo apt-get update
