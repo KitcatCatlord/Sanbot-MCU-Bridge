@@ -87,7 +87,8 @@ def claim_bulk_endpoints(dev: usb.core.Device | None) -> USBEndpoints:
 
 
 def short_to_bytes(val: int) -> bytes:
-    return struct.pack('>H', val & 0xFFFF)  # big-endian unsigned short
+    """Encode value as 16-bit big-endian (matches firmware Java short)."""
+    return struct.pack('>H', val & 0xFFFF)
 
 
 def int_to_bytes(val: int) -> bytes:
@@ -97,9 +98,9 @@ def int_to_bytes(val: int) -> bytes:
 def build_usb_frame(datas: bytes, ack_flag: int = 0x01) -> bytes:
     # Mirrors com.qihan.uvccamera.USBCommand
     # Defaults from decompiled app
-    type_short = 0xA403  # bytes A4 03
+    type_short = -0x5BFD  # bytes A4 03
     subtype_short = 0x0000
-    frame_head_short = 0xFFA5  # matches (-0x5b) << 8 | ? in app; empirically used
+    frame_head_short = -0x5B  # bytes FF A5
 
     # content_len = len(datas) + 5 (frame_head[2] + ack[1] + mmnn[2]) + 1 (checksum)
     content_len = len(datas) + 6
