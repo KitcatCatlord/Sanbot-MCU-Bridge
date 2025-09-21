@@ -152,6 +152,7 @@ CLI_READ_TIMEOUT_MS = 300
 CLI_AUTO_HEARTBEAT = True
 CLI_HEARTBEAT_INTERVAL_MS = 1500
 CLI_HEARTBEAT_HEAD = False
+CLI_DUMP_TX = False
 
 
 def send_bulk(ep_out, data: bytes, timeout_ms: int = 1000) -> int:
@@ -402,8 +403,10 @@ def _decode_known_datas(datas: bytes) -> dict | None:
 @click.option('--auto-heartbeat/--no-auto-heartbeat', default=True, help='Send periodic heartbeats while the CLI is running')
 @click.option('--heartbeat-interval', default=1500, type=int, help='Heartbeat interval in milliseconds')
 @click.option('--heartbeat-head/--no-heartbeat-head', default=False, help='Include head MCU in auto heartbeat loop')
+@click.option('--dump-tx/--no-dump-tx', default=False, help='Print raw frames written to USB')
 def cli(log_level: str, retries: int, unsafe: bool, auto_read: bool, read_timeout: int,
-        auto_heartbeat: bool, heartbeat_interval: int, heartbeat_head: bool):
+        auto_heartbeat: bool, heartbeat_interval: int, heartbeat_head: bool,
+        dump_tx: bool):
     """Sanbot USB MCU bridge (experimental)."""
     global CLI_RETRIES
     global CLI_AUTO_READ
@@ -411,6 +414,7 @@ def cli(log_level: str, retries: int, unsafe: bool, auto_read: bool, read_timeou
     global CLI_AUTO_HEARTBEAT
     global CLI_HEARTBEAT_INTERVAL_MS
     global CLI_HEARTBEAT_HEAD
+    global CLI_DUMP_TX
     CLI_RETRIES = max(1, retries)
     logging.basicConfig(level=getattr(logging, log_level))
     LOG.setLevel(getattr(logging, log_level))
@@ -429,6 +433,7 @@ def cli(log_level: str, retries: int, unsafe: bool, auto_read: bool, read_timeou
         interval_ms=CLI_HEARTBEAT_INTERVAL_MS,
         head_enabled=CLI_HEARTBEAT_HEAD,
     )
+    CLI_DUMP_TX = bool(dump_tx)
 
 
 # ----- YMODEM helpers for MCU upgrade -----
