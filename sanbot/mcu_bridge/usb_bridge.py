@@ -171,6 +171,30 @@ def send_bulk(ep_out, data: bytes, timeout_ms: int = 1000) -> int:
     raise last_err
 
 
+def _clear_halt(device: usb.core.Device, endpoint) -> None:
+    if endpoint is None:
+        return
+    try:
+        endpoint.clear_halt()  # type: ignore[attr-defined]
+        return
+    except AttributeError:
+        pass
+    except usb.core.USBError as exc:  # type: ignore[attr-defined]
+        if getattr(exc, 'errno', None) not in (errno.EPIPE, errno.ENOENT, errno.EINVAL):
+            LOG.debug("clear_halt on ep 0x%02X failed: %s", endpoint.bEndpointAddress, exc)
+        return
+    try:
+        usb.util.clear_halt(device, endpoint.bEndpointAddress)
+    except usb.core.USBError as exc:  # type: ignore[attr-defined]
+        if getattr(exc, 'errno', None) not in (errno.EPIPE, errno.ENOENT, errno.EINVAL):
+            LOG.debug("usb.util.clear_halt on ep 0x%02X failed: %s", endpoint.bEndpointAddress, exc)
+
+
+def _ensure_endpoints_ready(eps: USBEndpoints) -> None:
+    _clear_halt(eps.dev, eps.ep_out)
+    _clear_halt(eps.dev, eps.ep_in)
+
+
 def send_command(eps: USBEndpoints, data: bytes, *, label: str | None = None,
                  expect_response: bool | None = None,
                  read_timeout_ms: int | None = None) -> int:
@@ -178,12 +202,17 @@ def send_command(eps: USBEndpoints, data: bytes, *, label: str | None = None,
         if CLI_DUMP_TX:
             prefix = label or 'tx'
             print(f'-> {prefix}: len={len(data)} hex={data.hex()}')
-        wrote = send_bulk(eps.ep_out, data)
-        should_read = CLI_AUTO_READ if expect_response is None else bool(expect_response)
-        if should_read and eps.ep_in is not None:
-            timeout = read_timeout_ms if read_timeout_ms is not None else CLI_READ_TIMEOUT_MS
-            _maybe_auto_read(eps, label=label, timeout_ms=timeout)
-        return wrote
+        HEARTBEAT_MANAGER.pause()
+        try:
+            _ensure_endpoints_ready(eps)
+            wrote = send_bulk(eps.ep_out, data)
+            should_read = CLI_AUTO_READ if expect_response is None else bool(expect_response)
+            if should_read and eps.ep_in is not None:
+                timeout = read_timeout_ms if read_timeout_ms is not None else CLI_READ_TIMEOUT_MS
+                _maybe_auto_read(eps, label=label, timeout_ms=timeout)
+            return wrote
+        finally:
+            HEARTBEAT_MANAGER.resume()
 
 
 def release_endpoints(eps: USBEndpoints | None) -> None:
@@ -1849,6 +1878,10 @@ class HeartbeatManager:
         self.interval_ms = 1500
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
+        self._pause_event = threading.Event()
+        self._pause_event.set()
+        self._lock = threading.Lock()
+        self._pause_count = 0
 
     def configure(self, *, enabled: bool, interval_ms: int, head_enabled: bool) -> None:
         self.enabled = enabled
@@ -1858,6 +1891,7 @@ class HeartbeatManager:
             self.start()
         else:
             self.stop()
+            self._reset_pause_state()
 
     def start(self) -> None:
         if not self.enabled:
@@ -1865,17 +1899,45 @@ class HeartbeatManager:
         if self._thread and self._thread.is_alive():
             return
         self._stop_event.clear()
+        with self._lock:
+            if self._pause_count == 0:
+                self._pause_event.set()
         self._thread = threading.Thread(target=self._run, name="sanbot-heartbeat", daemon=True)
         self._thread.start()
 
     def stop(self) -> None:
         self._stop_event.set()
+        self._pause_event.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=1.0)
         self._thread = None
 
+    def pause(self) -> None:
+        if not self.enabled:
+            return
+        with self._lock:
+            self._pause_count += 1
+            self._pause_event.clear()
+
+    def resume(self) -> None:
+        if not self.enabled:
+            return
+        with self._lock:
+            if self._pause_count > 0:
+                self._pause_count -= 1
+            if self._pause_count == 0:
+                self._pause_event.set()
+
+    def _reset_pause_state(self) -> None:
+        with self._lock:
+            self._pause_count = 0
+            self._pause_event.set()
+
     def _run(self) -> None:
-        while not self._stop_event.wait(self.interval_ms / 1000.0):
+        while not self._stop_event.is_set():
+            self._pause_event.wait()
+            if self._stop_event.wait(self.interval_ms / 1000.0):
+                break
             self._heartbeat_cycle('bottom', PID_BOTTOM, POINT_BOTTOM)
             if self.head_enabled:
                 self._heartbeat_cycle('head', PID_HEAD, POINT_HEAD)
