@@ -6,6 +6,8 @@ monitoring inbound USB data, and recording any combination of those feeds to
 disk. It is meant to be a quick functional test bench when you are bringing up
 hardware or validating firmware changes.
 
+For a lightweight console-based check (no GUI), see `transfer/test_bridge.py`.
+
 ## Installation
 
 On Raspberry Pi you can run the helper script (installs APT packages, creates

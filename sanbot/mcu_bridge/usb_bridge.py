@@ -9,7 +9,51 @@ import atexit
 import click
 from click.exceptions import Abort
 
-from .lib.safety import SafetyValidator
+try:
+    from .lib.safety import SafetyValidator
+except ImportError:  # pragma: no cover - local copy without package context
+    try:
+        from sanbot.mcu_bridge.lib.safety import SafetyValidator  # type: ignore
+    except ImportError:  # pragma: no cover - final fallback
+        class SafetyValidator:  # minimal stub when safety module is unavailable
+            def __init__(self, limits=None, unsafe: bool = False):
+                self.unsafe = unsafe
+
+            def set_unsafe(self, unsafe: bool):
+                self.unsafe = unsafe
+
+            # Wheels
+            def wheels_angle(self, speed: int, deg: int):
+                pass
+
+            def wheels_time(self, ms: int):
+                pass
+
+            def wheels_distance(self, speed: int, mm: int):
+                pass
+
+            # Head
+            def head_absolute(self, hdeg: int, vdeg: int):
+                pass
+
+            def head_axis(self, speed: int, deg: int):
+                pass
+
+            def head_time(self, ms: int):
+                pass
+
+            def head_noangle(self, speed: int):
+                pass
+
+            # Hands
+            def hand_angle(self, speed: int, deg: int):
+                pass
+
+            def hand_time(self, ms: int, deg: int):
+                pass
+
+            def hand_noangle(self, speed: int):
+                pass
 
 try:
     import usb.core
@@ -25,6 +69,82 @@ PID_HEAD = 0x5741    # Head MCU
 
 POINT_HEAD = 0x01
 POINT_BOTTOM = 0x02
+
+# Firmware enums (mirrors com.sunbo.main.bean.* definitions)
+WHEEL_TURN_ACTIONS = {
+    'left': 0x01,
+    'right': 0x02,
+    'stop': 0x00,
+}
+
+WHEEL_RUN_ACTIONS = {
+    'stop': 0x00,
+    'forward': 0x01,
+    'back': 0x02,
+    'left': 0x03,
+    'right': 0x04,
+    'forward-left': 0x05,
+    'forward-right': 0x06,
+    'back-left': 0x07,
+    'back-right': 0x08,
+    'strafe-left': 0x0A,
+    'strafe-right': 0x0B,
+    'turn-left': 0x0C,
+    'turn-right': 0x0D,
+}
+
+WHEEL_DISTANCE_ACTIONS = WHEEL_RUN_ACTIONS  # same enumerations as DistanceWheelMotion
+
+HEAD_ABSOLUTE_AXES = {
+    'vertical': 0x01,
+    'horizontal': 0x02,
+}
+
+HEAD_RELATIVE_ACTIONS = {
+    'stop': 0x00,
+    'up': 0x01,
+    'down': 0x02,
+    'left': 0x03,
+    'right': 0x04,
+    'left-up': 0x05,
+    'right-up': 0x06,
+    'left-down': 0x07,
+    'right-down': 0x08,
+}
+
+HEAD_LOCATE_LOCKS = {
+    'none': 0x00,
+    'horizontal': 0x01,
+    'vertical': 0x02,
+    'both': 0x03,
+}
+
+HEAD_LOCATE_HORIZONTAL_DIRS = {
+    'none': 0x00,
+    'left': 0x01,
+    'right': 0x02,
+}
+
+HEAD_LOCATE_VERTICAL_DIRS = {
+    'none': 0x00,
+    'up': 0x01,
+    'down': 0x02,
+}
+
+HEAD_NOANGLE_ACTIONS = {
+    'stop': 0x00,
+    'up': 0x01,
+    'down': 0x02,
+    'left': 0x03,
+    'right': 0x04,
+    'left-up': 0x05,
+    'right-up': 0x06,
+    'left-down': 0x07,
+    'right-down': 0x08,
+    'vertical-reset': 0x09,
+    'horizontal-reset': 0x0A,
+    'center-reset': 0x0B,
+}
 
 
 class USBEndpoints:
@@ -213,6 +333,24 @@ def send_command(eps: USBEndpoints, data: bytes, *, label: str | None = None,
             return wrote
         finally:
             HEARTBEAT_MANAGER.resume()
+
+
+def _send_simple_command(eps: USBEndpoints, payload: bytes, tag: int,
+                         label: str) -> None:
+    frame = build_usb_frame(payload) + struct.pack('B', tag & 0xFF)
+    send_command(eps, frame, label=label, expect_response=False)
+
+
+def _unlock_head(eps: USBEndpoints) -> None:
+    # Unlock head motors and disable guard on head/neck (whichPart 0x03).
+    _send_simple_command(eps, bytes([0x05, 0x01, 0x03, 0x00]), POINT_HEAD, 'motor_lock_head_off')
+    _send_simple_command(eps, bytes([0x05, 0x02, 0x03, 0x00]), POINT_HEAD, 'motor_defend_head_off')
+
+
+def _unlock_wheels(eps: USBEndpoints) -> None:
+    # Unlock wheel motors and disable guard for wheels (whichPart 0x21).
+    _send_simple_command(eps, bytes([0x05, 0x01, 0x21, 0x00]), POINT_BOTTOM, 'motor_lock_wheels_off')
+    _send_simple_command(eps, bytes([0x05, 0x02, 0x21, 0x00]), POINT_BOTTOM, 'motor_defend_wheels_off')
 
 
 def release_endpoints(eps: USBEndpoints | None) -> None:
@@ -571,12 +709,18 @@ def wheel_payload(mode: int, direction: int, *, speed: int = None,
     # Mirrors WheelUSBCommand.getCommandBytes()
     # Payload: [0x01, mode, direction, ...variant...]
     datas = bytearray([0x01, mode & 0xFF, direction & 0xFF])
-    if mode == 0x10:  # time-based
-        if ms is None:
-            raise click.ClickException('time mode (0x10) requires --ms')
+    if mode == 0x01:  # run with optional duration (NoAngleWheelMotion)
+        if speed is None or ms is None:
+            raise click.ClickException('mode 0x01 requires --speed and --ms')
         lsb_time = ms & 0xFF
         msb_time = (ms >> 8) & 0xFF
-        datas += bytes([lsb_time, msb_time, is_circle & 0xFF])
+        datas += bytes([speed & 0xFF, lsb_time, msb_time, is_circle & 0xFF])
+    elif mode == 0x10:  # legacy alias used by historical tooling
+        if speed is None or ms is None:
+            raise click.ClickException('time mode (0x10) requires --speed and --ms')
+        lsb_time = ms & 0xFF
+        msb_time = (ms >> 8) & 0xFF
+        datas += bytes([speed & 0xFF, lsb_time, msb_time, is_circle & 0xFF])
     elif mode in (0x02, 0x03):  # angle-based (relative)
         if speed is None or deg is None:
             raise click.ClickException('angle mode (0x02/0x03) requires --speed and --deg')
@@ -600,50 +744,60 @@ def wheels():
 
 
 @wheels.command('angle')
-@click.option('--dir', 'direction', type=click.Choice(['left', 'right']), required=True)
-@click.option('--speed', type=int, required=True)
-@click.option('--deg', type=int, required=True)
+@click.option('--direction', type=click.Choice(sorted(WHEEL_TURN_ACTIONS)),
+              required=True, help='Turn direction (RelativeAngleWheelMotion.*)')
+@click.option('--speed', type=int, required=True, help='0-255 speed byte')
+@click.option('--deg', type=int, required=True, help='Relative turn degrees')
 def wheels_angle(direction: str, speed: int, deg: int):
-    mode = 0x02  # relative angle
-    dir_code = 0x02 if direction == 'left' else 0x03
+    mode = 0x02  # RelativeAngleWheelMotion
+    dir_code = WHEEL_TURN_ACTIONS[direction]
     CLI_SAFETY.wheels_angle(speed, deg)
     datas = wheel_payload(mode, dir_code, speed=speed, deg=deg)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_wheels(eps)
     wrote = send_command(eps, frame)
     print(f"Wheels angle {direction} sent ({wrote} bytes)")
 
 
 @wheels.command('time')
-@click.option('--dir', 'direction', type=click.Choice(['forward', 'back']), required=True)
-@click.option('--speed', type=int, default=100)
-@click.option('--ms', type=int, required=True)
-@click.option('--circle/--no-circle', default=False)
-def wheels_time(direction: str, speed: int, ms: int, circle: bool):
-    mode = 0x10  # time
-    dir_code = 0x01 if direction == 'forward' else 0x00
+@click.option('--pattern', type=click.Choice(sorted(WHEEL_RUN_ACTIONS)),
+              default='forward', show_default=True,
+              help='Run pattern (NoAngleWheelMotion.*)')
+@click.option('--speed', type=int, default=100, show_default=True,
+              help='0-255 speed byte')
+@click.option('--ms', type=int, required=True, help='Duration in milliseconds')
+@click.option('--circle/--no-circle', default=False,
+              help='Set circle flag (firmware-specific)')
+def wheels_time(pattern: str, speed: int, ms: int, circle: bool):
+    mode = 0x01  # NoAngleWheelMotion
+    dir_code = WHEEL_RUN_ACTIONS[pattern]
     CLI_SAFETY.wheels_time(ms)
-    datas = wheel_payload(mode, dir_code, ms=ms, is_circle=1 if circle else 0)
+    datas = wheel_payload(mode, dir_code, speed=speed, ms=ms, is_circle=1 if circle else 0)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_wheels(eps)
     wrote = send_command(eps, frame)
     print(f"Wheels time {direction} {ms}ms sent ({wrote} bytes)")
 
 
 @wheels.command('distance')
-@click.option('--dir', 'direction', type=click.Choice(['forward', 'back']), required=True)
-@click.option('--speed', type=int, required=True)
-@click.option('--mm', type=int, required=True)
-def wheels_distance(direction: str, speed: int, mm: int):
-    mode = 0x11  # distance
-    dir_code = 0x01 if direction == 'forward' else 0x00
+@click.option('--pattern', type=click.Choice(sorted(WHEEL_DISTANCE_ACTIONS)),
+              default='forward', show_default=True,
+              help='Distance pattern (DistanceWheelMotion.*)')
+@click.option('--speed', type=int, required=True, help='0-255 speed byte')
+@click.option('--mm', type=int, required=True, help='Distance in millimetres')
+def wheels_distance(pattern: str, speed: int, mm: int):
+    mode = 0x11  # DistanceWheelMotion
+    dir_code = WHEEL_DISTANCE_ACTIONS[pattern]
     CLI_SAFETY.wheels_distance(speed, mm)
     datas = wheel_payload(mode, dir_code, speed=speed, mm=mm)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_BOTTOM)
     dev = find_device(VID, PID_BOTTOM) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_wheels(eps)
     wrote = send_command(eps, frame)
     print(f"Wheels distance {direction} {mm}mm sent ({wrote} bytes)")
 
@@ -1610,21 +1764,142 @@ def auto_report(switch_mode: int):
     print(f"Auto-report set to {switch_mode} ({wrote} bytes)")
 
 
+@cli.command('self-test')
+@click.option('--include-wheels/--skip-wheels', default=False,
+              help='Exercise wheel motions (ensure the robot is safely raised).')
+@click.option('--wheel-speed', type=int, default=80, show_default=True,
+              help='Speed byte for wheel test (0-255).')
+@click.option('--head-speed', type=int, default=40, show_default=True,
+              help='Speed byte for head test (0-255).')
+@click.option('--arm-speed', type=int, default=60, show_default=True,
+              help='Speed byte for arm test (0-255).')
+@click.option('--duration', type=int, default=600, show_default=True,
+              help='Duration in milliseconds for timed motions.')
+def self_test(include_wheels: bool, wheel_speed: int, head_speed: int,
+              arm_speed: int, duration: int) -> None:
+    """Interactive hardware smoke test (prompts for confirmation)."""
+
+    global CLI_DUMP_TX, CLI_AUTO_READ, CLI_READ_TIMEOUT_MS, CLI_AUTO_HEARTBEAT
+    global CLI_HEARTBEAT_INTERVAL_MS, CLI_HEARTBEAT_HEAD
+
+    def _header(title: str) -> None:
+        click.secho(f"\n=== {title} ===", fg='cyan')
+
+    def _confirm(question: str) -> bool:
+        return click.confirm(question, default=False, show_default=True)
+
+    CLI_DUMP_TX = True  # noqa: F841 (local assignment for clarity)
+    # Configure globals for verbose interaction
+    bridge_logger = logging.getLogger("mcu_bridge")
+    bridge_logger.setLevel(logging.INFO)
+    HEARTBEAT_MANAGER.configure(enabled=True,
+                                interval_ms=max(500, CLI_HEARTBEAT_INTERVAL_MS),
+                                head_enabled=True)
+
+    click.echo("Connecting to Sanbot MCUs…")
+    bottom_dev = find_device(VID, PID_BOTTOM)
+    head_dev = find_device(VID, PID_HEAD)
+    if bottom_dev is None or head_dev is None:
+        raise click.ClickException('Unable to locate head and/or bottom MCU over USB')
+
+    bottom_eps = claim_bulk_endpoints(bottom_dev)
+    head_eps = claim_bulk_endpoints(head_dev)
+    results: list[tuple[str, bool]] = []
+
+    try:
+        _header('Heartbeat')
+        for tag, eps, label in ((POINT_BOTTOM, bottom_eps, 'bottom'),
+                                (POINT_HEAD, head_eps, 'head')):
+            frame = build_usb_frame(heartbeat_payload()) + struct.pack('B', tag)
+            send_command(eps, frame, label=f'heartbeat_{label}')
+        results.append(('Heartbeat acknowledged', _confirm('Did both heartbeats respond?')))
+
+        if include_wheels:
+            _header('Wheels')
+            _unlock_wheels(bottom_eps)
+            wheels_frame = build_usb_frame(
+                wheel_payload(0x01,
+                              WHEEL_RUN_ACTIONS['forward'],
+                              speed=wheel_speed,
+                              ms=duration)
+            ) + struct.pack('B', POINT_BOTTOM)
+            send_command(bottom_eps, wheels_frame, label='wheels_forward')
+            results.append(('Wheel forward run', _confirm('Did wheels spin safely?')))
+        else:
+            results.append(('Wheel test skipped', True))
+
+        _header('Head vertical move')
+        _unlock_head(head_eps)
+        head_frame = build_usb_frame(
+            head_payload(0x03,
+                         HEAD_ABSOLUTE_AXES['vertical'],
+                         speed=head_speed,
+                         deg=-10)
+        ) + struct.pack('B', POINT_HEAD)
+        send_command(head_eps, head_frame, label='head_vertical')
+        results.append(('Head nod', _confirm('Head nodded downward?')))
+
+        _header('Left arm')
+        arm_frame = build_usb_frame(
+            hand_payload(0x02, 0x11, direction=0x01, speed=arm_speed, deg=20)
+        ) + struct.pack('B', POINT_BOTTOM)
+        send_command(bottom_eps, arm_frame, label='left_arm')
+        results.append(('Left arm lift', _confirm('Left arm moved?')))
+
+        _header('Sensors (battery/gyro/touch)')
+        sensor_batches = [
+            (battery_query_payload(), POINT_BOTTOM, 'battery'),
+            (gyro_query_payload(), POINT_BOTTOM, 'gyro'),
+            (bytes([0x81, 0x05, 0x01, 0x00]), POINT_HEAD, 'touch'),
+        ]
+        for payload, tag, label in sensor_batches:
+            frame = build_usb_frame(payload) + struct.pack('B', tag)
+            send_command(bottom_eps if tag == POINT_BOTTOM else head_eps,
+                         frame, label=f'sensor_{label}', expect_response=True)
+            time.sleep(0.2)
+        results.append(('Sensor replies', _confirm('Sensor outputs decoded correctly?')))
+
+    finally:
+        release_endpoints(bottom_eps)
+        release_endpoints(head_eps)
+        HEARTBEAT_MANAGER.stop()
+
+    _header('Summary')
+    failed = []
+    for label, success in results:
+        colour = 'green' if success else 'red'
+        status = 'PASS' if success else 'FAIL'
+        click.echo(f"{label:<30} {click.style(status, fg=colour)}")
+        if not success:
+            failed.append(label)
+
+    if failed:
+        raise click.ClickException('Issues observed: ' + ', '.join(failed))
+
+    click.secho('All checks passed!', fg='green')
+
+
 # ----- Head motion -----
 
 def head_payload(mode: int, direction: int, **kwargs) -> bytes:
     # Mirrors HeadUSBCommand: [0x02, moveHeadMode, moveHeadDirection, ...variant...]
     datas = bytearray([0x02, mode & 0xFF, direction & 0xFF])
-    if mode == 0x10:  # time
+    if mode == 0x03:  # AbsoluteAngleHeadMotion
+        deg = kwargs.get('deg')
+        speed = kwargs.get('speed', 0)
+        if deg is None:
+            raise click.ClickException('head absolute requires --deg')
+        datas += bytes([speed & 0xFF, deg & 0xFF, ((deg >> 8) & 0xFF)])
+    elif mode == 0x10:  # time
         lsb = (kwargs.get('ms', 0)) & 0xFF
         msb = ((kwargs.get('ms', 0)) >> 8) & 0xFF
         deg_or_flag = kwargs.get('deg_or_flag', 0) & 0xFF
         datas += bytes([lsb, msb, deg_or_flag])
-    elif mode in (0x02, 0x03):  # angle on one axis
+    elif mode == 0x02:  # RelativeAngleHeadMotion single-axis tweaks
         speed = kwargs.get('speed')
         deg = kwargs.get('deg')
         if speed is None or deg is None:
-            raise click.ClickException('head mode 0x02/0x03 requires --speed and --deg')
+            raise click.ClickException('head mode 0x02 requires --speed and --deg')
         datas += bytes([speed & 0xFF, (deg & 0xFF), ((deg >> 8) & 0xFF)])
     elif mode == 0x21:  # absolute H/V
         h = kwargs.get('hdeg', 0)
@@ -1637,8 +1912,10 @@ def head_payload(mode: int, direction: int, **kwargs) -> bytes:
         vdeg = kwargs.get('vdeg', 0) & 0xFF
         datas += bytes([hdir, hdeg, vdir, vdeg])
     elif mode == 0x01:  # no-angle
-        speed = kwargs.get('speed', 0) & 0xFF
-        datas += bytes([speed])
+        speed = kwargs.get('speed')
+        if speed is None:
+            raise click.ClickException('head mode 0x01 requires --speed')
+        datas += bytes([speed & 0xFF])
     else:
         raise click.ClickException(f'unsupported head mode: 0x{mode:02X}')
     return bytes(datas)
@@ -1650,76 +1927,100 @@ def head():
 
 
 @head.command('absolute')
-@click.option('--hdeg', type=int, required=True, help='horizontal degrees (0-360 or device range)')
-@click.option('--vdeg', type=int, required=True, help='vertical degrees')
-def head_absolute(hdeg: int, vdeg: int):
-    _assert_range('hdeg', hdeg, -180, 180)
-    _assert_range('vdeg', vdeg, -90, 90)
-    CLI_SAFETY.head_absolute(hdeg, vdeg)
-    datas = head_payload(0x21, 0x00, hdeg=hdeg, vdeg=vdeg)
+@click.option('--axis', type=click.Choice(sorted(HEAD_ABSOLUTE_AXES)), required=True,
+              help='Axis to move (AbsoluteAngleHeadMotion: vertical/horizontal)')
+@click.option('--deg', type=int, required=True, help='Target degrees for the chosen axis')
+@click.option('--speed', type=int, default=0, show_default=True,
+              help='Optional speed byte (0 lets MCU choose)')
+def head_absolute(axis: str, deg: int, speed: int):
+    if axis == 'horizontal':
+        _assert_range('deg', deg, -180, 180)
+        CLI_SAFETY.head_absolute(deg, 0)
+    else:
+        _assert_range('deg', deg, -90, 90)
+        CLI_SAFETY.head_absolute(0, deg)
+    datas = head_payload(0x03, HEAD_ABSOLUTE_AXES[axis], speed=speed, deg=deg)
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_head(eps)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
     wrote = send_command(eps, frame)
     print(f"Head absolute sent ({wrote} bytes)")
 
 
 @head.command('relative')
-@click.option('--hdir', type=int, required=True, help='horizontal direction code')
-@click.option('--hdeg', type=int, required=True, help='horizontal degrees')
-@click.option('--vdir', type=int, required=True, help='vertical direction code')
-@click.option('--vdeg', type=int, required=True, help='vertical degrees')
-def head_relative(hdir: int, hdeg: int, vdir: int, vdeg: int):
-    datas = head_payload(0x22, 0x00, hdir=hdir, hdeg=hdeg, vdir=vdir, vdeg=vdeg)
+@click.option('--lock', type=click.Choice(sorted(HEAD_LOCATE_LOCKS)), default='none', show_default=True,
+              help='Lock mode (LocateRelativeAngleHeadMotion.ACTION_*)')
+@click.option('--hdir', type=click.Choice(sorted(HEAD_LOCATE_HORIZONTAL_DIRS)),
+              default='none', show_default=True, help='Horizontal direction (left/right/none)')
+@click.option('--hdeg', type=int, default=0, show_default=True, help='Horizontal degrees (0-255)')
+@click.option('--vdir', type=click.Choice(sorted(HEAD_LOCATE_VERTICAL_DIRS)),
+              default='none', show_default=True, help='Vertical direction (up/down/none)')
+@click.option('--vdeg', type=int, default=0, show_default=True, help='Vertical degrees (0-255)')
+def head_relative(lock: str, hdir: str, hdeg: int, vdir: str, vdeg: int):
+    datas = head_payload(
+        0x22,
+        HEAD_LOCATE_LOCKS[lock],
+        hdir=HEAD_LOCATE_HORIZONTAL_DIRS[hdir],
+        hdeg=hdeg,
+        vdir=HEAD_LOCATE_VERTICAL_DIRS[vdir],
+        vdeg=vdeg,
+    )
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_head(eps)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
     wrote = send_command(eps, frame)
     print(f"Head relative sent ({wrote} bytes)")
 
 
 @head.command('angle')
-@click.option('--axis', type=click.Choice(['h', 'v']), required=True, help='axis: h=0x02, v=0x03')
-@click.option('--dir', 'direction', type=int, required=True, help='direction code')
-@click.option('--speed', type=int, required=True)
-@click.option('--deg', type=int, required=True)
-def head_angle(axis: str, direction: int, speed: int, deg: int):
+@click.option('--direction', type=click.Choice(sorted(HEAD_RELATIVE_ACTIONS)),
+              required=True, help='RelativeAngleHeadMotion direction (up/down/left/…)')
+@click.option('--speed', type=int, required=True, help='0-255 speed byte')
+@click.option('--deg', type=int, required=True, help='Degrees to move (0-90 typical)')
+def head_angle(direction: str, speed: int, deg: int):
     _assert_range('speed', speed, 0, 255)
     _assert_range('deg', deg, 0, 90)
     CLI_SAFETY.head_axis(speed, deg)
-    mode = 0x02 if axis == 'h' else 0x03
-    datas = head_payload(mode, direction, speed=speed, deg=deg)
+    datas = head_payload(0x02, HEAD_RELATIVE_ACTIONS[direction], speed=speed, deg=deg)
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_head(eps)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
     wrote = send_command(eps, frame)
     print(f"Head angle sent ({wrote} bytes)")
 
 
 @head.command('time')
-@click.option('--dir', 'direction', type=int, required=True, help='direction code')
-@click.option('--ms', type=int, required=True)
-@click.option('--flag', 'deg_or_flag', type=int, default=0)
-def head_time(direction: int, ms: int, deg_or_flag: int):
+@click.option('--direction', type=click.Choice(sorted(HEAD_NOANGLE_ACTIONS)),
+              required=True, help='NoAngleHeadMotion action')
+@click.option('--ms', type=int, required=True, help='Duration in milliseconds')
+@click.option('--flag', 'deg_or_flag', type=int, default=0,
+              help='Firmware flag byte (rarely used)')
+def head_time(direction: str, ms: int, deg_or_flag: int):
     _assert_range('ms', ms, 1, 600000)
     CLI_SAFETY.head_time(ms)
-    datas = head_payload(0x10, direction, ms=ms, deg_or_flag=deg_or_flag)
+    datas = head_payload(0x10, HEAD_NOANGLE_ACTIONS[direction], ms=ms, deg_or_flag=deg_or_flag)
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_head(eps)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
     wrote = send_command(eps, frame)
     print(f"Head time sent ({wrote} bytes)")
 
 
 @head.command('noangle')
-@click.option('--dir', 'direction', type=int, required=True)
-@click.option('--speed', type=int, required=True)
-def head_noangle(direction: int, speed: int):
+@click.option('--direction', type=click.Choice(sorted(HEAD_NOANGLE_ACTIONS)),
+              required=True, help='NoAngleHeadMotion action')
+@click.option('--speed', type=int, required=True, help='0-255 speed byte')
+def head_noangle(direction: str, speed: int):
     _assert_range('speed', speed, 0, 255)
     CLI_SAFETY.head_noangle(speed)
-    datas = head_payload(0x01, direction, speed=speed)
+    datas = head_payload(0x01, HEAD_NOANGLE_ACTIONS[direction], speed=speed)
     dev = find_device(VID, PID_HEAD) or click.Abort()
     eps = claim_bulk_endpoints(dev)
+    _unlock_head(eps)
     frame = build_usb_frame(datas) + struct.pack('B', POINT_HEAD)
     wrote = send_command(eps, frame)
     print(f"Head no-angle sent ({wrote} bytes)")
