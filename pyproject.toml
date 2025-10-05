@@ -44,12 +44,13 @@ tester = [
 sanbot-usb = "sanbot.mcu_bridge.usb_bridge:cli"
 sanbot-camera = "sanbot.camera_bridge.camera:cli"
 sanbot-audio = "sanbot.audio_bridge.audio:cli"
+sanbot-bridge-gui = "programs.usb_bridge_tester:main"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["sanbot*", "toolbox*"]
+include = ["sanbot*", "toolbox*", "programs*"]
 exclude = ["tools*", "docs*", "server*", "pi*", "scripts*", "common*"]
 
 [tool.setuptools.package-data]

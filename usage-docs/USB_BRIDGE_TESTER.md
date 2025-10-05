@@ -40,8 +40,12 @@ DirectShow/CoreAudio on Windows/macOS).
 From the repository root:
 
 ```
-python programs/usb_bridge_tester.py
+sanbot-bridge-gui
 ```
+
+The launcher applies a dark Fusion theme, tabs for media tools, and auto-loads
+the latest CLI commands. For backwards compatibility you can still run
+`python programs/usb_bridge_tester.py`.
 
 For a hardware-free dry run (synthetic camera/audio/USB data), launch the demo
 variant:
@@ -52,11 +56,13 @@ python programs/usb_bridge_tester_demo.py
 
 ## Layout overview
 
-- **Command panel (left)** – Tree of every Click command/group defined in
-  `usb_bridge.py`. Selecting a command exposes all options with type-aware
-  widgets. Use **Ctrl+Enter** to trigger the selected command. The underlying
-  CLI auto-reads a single response frame (toggle with `--no-auto-read`), so
-  decoded replies appear immediately in the log pane.
+- **Command panel (left)** – Searchable tree of every Click command/group
+  defined in `usb_bridge.py`. Use the filter box to quickly locate commands,
+  expand/collapse in one click, and reload definitions if you are editing the
+  CLI. Selecting a command exposes all options with type-aware widgets. Use
+  **Ctrl+Enter** (or double-click) to trigger the selection. Global CLI options
+  such as retries, auto-read, heartbeat, and TX dumping can be toggled from the
+  status panel, so the GUI now mirrors all CLI behaviour.
 - **Camera pane (top-right)** – Live preview with selectable device index, and
   start/stop controls. Recording writes MJPEG `.avi` clips under
   `recordings/session_*/camera/`.
@@ -67,10 +73,14 @@ python programs/usb_bridge_tester_demo.py
   the selected MCU (`bottom` or `head`). Raw hex plus a best-effort decoded view
   is shown, and recorded `.bin` dumps are stored under
   `recordings/session_*/usb/`.
-- **Log panel (bottom)** – Status messages, command execution outcomes, and
-  device errors.
-- **Status strip (bottom)** – Apply CLI defaults (log level/retries/safety),
-  toggle recording, and trigger the emergency stop.
+- **Log panel (bottom-right)** – Status messages, command execution outcomes,
+  and device errors in a dark themed console that retains ~2000 lines.
+- **Status strip (bottom)** – Apply the full CLI defaults (log level, retries,
+  safety, auto-read, timeouts, heartbeat settings, TX dumping), see how many
+  commands are loaded, toggle recording, and trigger the emergency stop.
+
+The GUI watches the CLI module on disk; saving `sanbot/mcu_bridge/usb_bridge.py`
+automatically reloads the command tree so you always see the newest options.
 
 Each executed command is captured to `recordings/session_*/commands/commands.jsonl`
 when recording is active.
@@ -95,7 +105,8 @@ recording state.
 - `Ctrl+U` – Start USB monitoring
 - `Ctrl+R` – Start recording session
 - `Ctrl+Shift+R` – Stop recording session
-- `Ctrl+L` – Apply CLI global settings
+- `Ctrl+L` – Apply CLI global settings (log level, retries, safety, auto read,
+  heartbeat, dump TX)
 - `Ctrl+Shift+E` – Emergency stop (stops all streams, recording, and command
   threads)
 
@@ -108,8 +119,9 @@ stop buttons.
 
 ## Tips
 
-- Apply the CLI defaults (`log level`, `retries`, `unsafe`) before dispatching
-  commands so the underlying globals in `usb_bridge.py` match your intent.
+- Apply the CLI defaults (log level, retries, safety, auto-read, heartbeat,
+  dump TX) before dispatching commands so the underlying globals in
+  `usb_bridge.py` match your intent.
 - USB decoding uses the same `_decode_known_datas` helper as the CLI; for
   unknown frames you still see the raw hex for manual analysis.
 - If a dependency is missing, the program exits with an installation hint so you
