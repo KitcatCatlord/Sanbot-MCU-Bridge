@@ -170,7 +170,6 @@ def claim_bulk_endpoints(dev: usb.core.Device | None) -> USBEndpoints:
     except usb.core.USBError as exc:
         raise click.ClickException(f"Failed to configure USB device: {exc}") from exc
     cfg = dev.get_active_configuration()
-    # Iterate interfaces; pick first one with bulk in/out endpoints
     ep_out = ep_in = None
     intf = None
     for i in cfg:
@@ -188,7 +187,6 @@ def claim_bulk_endpoints(dev: usb.core.Device | None) -> USBEndpoints:
         except NotImplementedError:
             pass
         for ep in i:
-            # bmAttributes lower bits 0x02 = bulk; bEndpointAddress bit7 = direction
             is_bulk = (ep.bmAttributes & 0x03) == 0x02
             is_in = (ep.bEndpointAddress & 0x80) == 0x80
             if is_bulk and not is_in and ep_out is None:
@@ -218,9 +216,9 @@ def int_to_bytes(val: int) -> bytes:
 def build_usb_frame(datas: bytes, ack_flag: int = 0x01) -> bytes:
     # Mirrors com.qihan.uvccamera.USBCommand
     # Defaults from decompiled app
-    type_short = -0x5BFD  # bytes A4 03
+    type_short = -0x5BFD  # A4 03
     subtype_short = 0x0000
-    frame_head_short = -0x5B  # bytes FF A5
+    frame_head_short = -0x5B  # FF A5
 
     # content_len = len(datas) + 5 (frame_head[2] + ack[1] + mmnn[2]) + 1 (checksum)
     content_len = len(datas) + 6
@@ -255,7 +253,7 @@ def build_usb_frame(datas: bytes, ack_flag: int = 0x01) -> bytes:
 
 
 def heartbeat_payload(switch_mode: int = 1, lsb: int = 0, msb: int = 0) -> bytes:
-    # Mirrors HeartBeatCommand.getMessageCommand() payload (before USB frame)
+    # Mirrors HeartBeatCommand.getMessageCommand() payload (before USB frame) - NTS: Tested but no response captured! Also unsure of use case
     # [0x04, 0x08, switchMode] (and optionally lsb, msb when switchMode != 1)
     if switch_mode == 1:
         return bytes([0x04, 0x08, switch_mode & 0xFF])
@@ -299,13 +297,13 @@ def _clear_halt(device: usb.core.Device, endpoint) -> None:
         return
     except AttributeError:
         pass
-    except usb.core.USBError as exc:  # type: ignore[attr-defined]
+    except usb.core.USBError as exc:  # type: as above
         if getattr(exc, 'errno', None) not in (errno.EPIPE, errno.ENOENT, errno.EINVAL):
             LOG.debug("clear_halt on ep 0x%02X failed: %s", endpoint.bEndpointAddress, exc)
         return
     try:
         usb.util.clear_halt(device, endpoint.bEndpointAddress)
-    except usb.core.USBError as exc:  # type: ignore[attr-defined]
+    except usb.core.USBError as exc:  # type: as above
         if getattr(exc, 'errno', None) not in (errno.EPIPE, errno.ENOENT, errno.EINVAL):
             LOG.debug("usb.util.clear_halt on ep 0x%02X failed: %s", endpoint.bEndpointAddress, exc)
 
@@ -367,6 +365,7 @@ def release_endpoints(eps: USBEndpoints | None) -> None:
 
 
 # ----- Safety / validation helpers -----
+# NTS: I think I wrote this before the dedicated safety program, need to decide whether to delete safety from here not, or give deticated safety program ovveride over this
 
 def _assert_range(name, val, min_v, max_v):
     if val < min_v or val > max_v:
