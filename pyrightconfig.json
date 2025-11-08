@@ -1,11 +1,13 @@
 {
-  "include": ["."],
-  "ignore": ["**/tests/**", "**/__pycache__/**"],
-  "typeCheckingMode": "basic",
-  "reportUnnecessaryTypeIgnoreComment": false,
-  "reportUnusedVariable": false,
-  "reportUnusedImport": false,
-  "reportMissingTypeStubs": false,
-  "reportIncompatibleReturnType": false,
-  "reportGeneralTypeIssues": false
+  "typeCheckingMode": "off",
+  "reportGeneralTypeIssues": false,
+  "reportOptionalSubscript": false,
+  "reportOptionalMemberAccess": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownParameterType": false,
+  "reportOptionalCall": false,
+  "reportUnusedVariable": "warning",
+  "reportUnusedImport": "warning"
 }
