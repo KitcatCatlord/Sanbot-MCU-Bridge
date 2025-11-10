@@ -1,4 +1,16 @@
 from __future__ import annotations
+"""High level Sanbot API built on the usb_bridge helpers.
+
+Responsibilities
+- Manage two USB links for bottom and head MCUs
+- Provide convenient methods like wheels_time and head_absolute
+- Enforce safety checks before motion is sent
+- Offer a small event system for incoming frames
+
+Relationship to usb_bridge
+- Imports `sanbot.mcu_bridge.usb_bridge` and reuses its payload builders
+- Sends the exact same bytes as the CLI for the same intent
+"""
 
 import dataclasses
 import logging
@@ -14,6 +26,19 @@ except Exception:  # pragma: no cover - imported by CLI normally
 
 from .. import usb_bridge as _cli
 from .safety import SafetyValidator, SafetyLimits, SafetyError
+
+
+def _coerce_action_code(value: int | str, mapping: dict[str, int], label: str) -> int:
+    """Convert human-friendly direction/pattern strings to firmware codes."""
+    if isinstance(value, str):
+        key = value.strip().lower().replace('_', '-')
+        try:
+            return mapping[key]
+        except KeyError as exc:  # pragma: no cover - defensive
+            raise ValueError(
+                f"{label} must be one of {sorted(mapping)} (got {value!r})"
+            ) from exc
+    return int(value) & 0xFF
 
 
 @dataclasses.dataclass
@@ -293,7 +318,7 @@ class Sanbot:
         return self._send_bottom(datas)
 
     # Wheels (bottom)
-    def wheels_angle(self, direction: str, speed: int, deg: int) -> int:
+    def wheels_angle(self, direction: str | int, speed: int, deg: int) -> int:
         """Rotate in place by relative angle.
 
         Args:
@@ -302,35 +327,36 @@ class Sanbot:
             deg: degrees (0-65535) LSB/MSB on wire.
         """
         mode = 0x02
-        dir_code = 0x02 if direction == 'left' else 0x03
+        dir_code = _coerce_action_code(direction, _cli.WHEEL_TURN_ACTIONS, 'direction')
         self.safety.wheels_angle(speed, deg)
         datas = _cli.wheel_payload(mode, dir_code, speed=speed, deg=deg)
         return self._send_bottom(datas)
 
-    def wheels_time(self, direction: str, ms: int, circle: bool = False) -> int:
+    def wheels_time(self, direction: str | int, ms: int, circle: bool = False, *, speed: int = 100) -> int:
         """Drive forward/back for a duration.
 
         Args:
-            direction: 'forward' or 'back'.
+            direction: Any key from WHEEL_RUN_ACTIONS (forward/back/strafe/...).
             ms: milliseconds duration.
             circle: circle mode flag.
+            speed: 0-255 speed byte (default matches CLI).
         """
-        mode = 0x10
-        dir_code = 0x01 if direction == 'forward' else 0x00
+        mode = 0x01
+        dir_code = _coerce_action_code(direction, _cli.WHEEL_RUN_ACTIONS, 'direction')
         self.safety.wheels_time(ms)
-        datas = _cli.wheel_payload(mode, dir_code, ms=ms, is_circle=1 if circle else 0)
+        datas = _cli.wheel_payload(mode, dir_code, speed=speed, ms=ms, is_circle=1 if circle else 0)
         return self._send_bottom(datas)
 
-    def wheels_distance(self, direction: str, speed: int, mm: int) -> int:
+    def wheels_distance(self, direction: str | int, speed: int, mm: int) -> int:
         """Drive forward/back for a distance in millimeters.
 
         Args:
-            direction: 'forward' or 'back'.
+            direction: Any key from WHEEL_DISTANCE_ACTIONS.
             speed: 0-255.
             mm: millimeters (0-65535).
         """
         mode = 0x11
-        dir_code = 0x01 if direction == 'forward' else 0x00
+        dir_code = _coerce_action_code(direction, _cli.WHEEL_DISTANCE_ACTIONS, 'direction')
         self.safety.wheels_distance(speed, mm)
         datas = _cli.wheel_payload(mode, dir_code, speed=speed, mm=mm)
         return self._send_bottom(datas)
@@ -410,33 +436,44 @@ class Sanbot:
         return self._send_head(datas)
 
     # Head motion
-    def head_absolute(self, hdeg: int, vdeg: int) -> int:
-        """Move head to absolute angles (horizontal/vertical)."""
-        self.safety.head_absolute(hdeg, vdeg)
-        return self._send_head(_cli.head_payload(0x21, 0x00, hdeg=hdeg, vdeg=vdeg))
+    def head_absolute(self, hdeg: int | None, vdeg: int | None, *, speed: int = 0) -> int:
+        """Move head to absolute horizontal/vertical targets (pass None to skip an axis)."""
+        if hdeg is None and vdeg is None:
+            raise ValueError("Provide at least one axis (hdeg or vdeg) for head_absolute()")
+        self.safety.head_absolute(hdeg if hdeg is not None else 0, vdeg if vdeg is not None else 0)
+        wrote = 0
+        if hdeg is not None:
+            datas = _cli.head_payload(0x03, _cli.HEAD_ABSOLUTE_AXES['horizontal'], speed=speed, deg=hdeg)
+            wrote = self._send_head(datas)
+        if vdeg is not None:
+            datas = _cli.head_payload(0x03, _cli.HEAD_ABSOLUTE_AXES['vertical'], speed=speed, deg=vdeg)
+            wrote = self._send_head(datas)
+        return wrote
 
-    def head_relative(self, hdir: int, hdeg: int, vdir: int, vdeg: int) -> int:
-        """Move head by relative deltas on H and V axes."""
-        return self._send_head(_cli.head_payload(0x22, 0x00, hdir=hdir, hdeg=hdeg, vdir=vdir, vdeg=vdeg))
+    def head_relative(self, hdir: str | int, hdeg: int, vdir: str | int, vdeg: int, *, lock: str | int = 'none') -> int:
+        """Move head by relative deltas on H and V axes (lock can be 'none','horizontal','vertical','both')."""
+        lock_code = _coerce_action_code(lock, _cli.HEAD_LOCATE_LOCKS, 'lock')
+        hdir_code = _coerce_action_code(hdir, _cli.HEAD_LOCATE_HORIZONTAL_DIRS, 'hdir')
+        vdir_code = _coerce_action_code(vdir, _cli.HEAD_LOCATE_VERTICAL_DIRS, 'vdir')
+        return self._send_head(_cli.head_payload(0x22, lock_code, hdir=hdir_code, hdeg=hdeg, vdir=vdir_code, vdeg=vdeg))
 
-    def head_angle(self, axis: str, direction: int, speed: int, deg: int) -> int:
-        """Move head on a single axis by angle with speed.
-
-        axis: 'h' uses mode 0x02, 'v' uses 0x03 (firmware definitions).
-        """
+    def head_angle(self, axis: str, direction: str | int, speed: int, deg: int) -> int:
+        """Move head on a single axis by angle with speed (axis kept for backward compatibility)."""
         self.safety.head_axis(speed, deg)
-        mode = 0x02 if axis == 'h' else 0x03
-        return self._send_head(_cli.head_payload(mode, direction, speed=speed, deg=deg))
+        dir_code = _coerce_action_code(direction, _cli.HEAD_RELATIVE_ACTIONS, 'direction')
+        return self._send_head(_cli.head_payload(0x02, dir_code, speed=speed, deg=deg))
 
-    def head_time(self, direction: int, ms: int, flag: int = 0) -> int:
+    def head_time(self, direction: str | int, ms: int, flag: int = 0) -> int:
         """Timed head move with an extra deg-or-flag byte (device-specific)."""
         self.safety.head_time(ms)
-        return self._send_head(_cli.head_payload(0x10, direction, ms=ms, deg_or_flag=flag))
+        dir_code = _coerce_action_code(direction, _cli.HEAD_NOANGLE_ACTIONS, 'direction')
+        return self._send_head(_cli.head_payload(0x10, dir_code, ms=ms, deg_or_flag=flag))
 
-    def head_noangle(self, direction: int, speed: int) -> int:
+    def head_noangle(self, direction: str | int, speed: int) -> int:
         """Head move without angle (speed+direction only)."""
         self.safety.head_noangle(speed)
-        return self._send_head(_cli.head_payload(0x01, direction, speed=speed))
+        dir_code = _coerce_action_code(direction, _cli.HEAD_NOANGLE_ACTIONS, 'direction')
+        return self._send_head(_cli.head_payload(0x01, dir_code, speed=speed))
 
     def voice_location(self, hdeg: int, vdeg: int) -> int:
         """Send target head angles derived from voice localization."""

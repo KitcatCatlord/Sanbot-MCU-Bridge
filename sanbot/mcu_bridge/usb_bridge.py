@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+"""Sanbot MCU CLI and low level USB helpers.
+
+Responsibilities
+- Provide the Click based CLI under `cli` for direct control
+- Build and parse USB frames that match the device protocol
+- Define enums and payload builders for wheels, head, hands, LEDs and more
+- Handle USB device discovery and endpoint claiming
+
+Notes
+- This module is the source of truth for payload layouts and enums
+- The library API in `sanbot.mcu_bridge.lib.bridge` reuses these helpers
+"""
 import sys
 import struct
 import time
@@ -779,7 +791,7 @@ def wheels_time(pattern: str, speed: int, ms: int, circle: bool):
     eps = claim_bulk_endpoints(dev)
     _unlock_wheels(eps)
     wrote = send_command(eps, frame)
-    print(f"Wheels time {direction} {ms}ms sent ({wrote} bytes)")
+    print(f"Wheels time {pattern} {ms}ms sent ({wrote} bytes)")
 
 
 @wheels.command('distance')
@@ -798,7 +810,7 @@ def wheels_distance(pattern: str, speed: int, mm: int):
     eps = claim_bulk_endpoints(dev)
     _unlock_wheels(eps)
     wrote = send_command(eps, frame)
-    print(f"Wheels distance {direction} {mm}mm sent ({wrote} bytes)")
+    print(f"Wheels distance {pattern} {mm}mm sent ({wrote} bytes)")
 
 
 # ----- LED commands -----
@@ -2292,7 +2304,7 @@ def listen(target: str, timeout: int, verbose: bool):
                         # discard one byte to resync if header mismatches
                         buf.pop(0)
                         continue
-                    frame_bytes = bytes(buf[:parsed['total_len']])
+                    frame_bytes = bytes(buf[:parsed['total_len']]) # TODO: Decide whether to remove this
                     del buf[:parsed['total_len']]
                     if verbose:
                         dec = _decode_known_datas(parsed['datas'])

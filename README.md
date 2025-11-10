@@ -27,6 +27,18 @@ sanbot-usb listen --target bottom --verbose
 - Camera CLI: `sanbot-camera` (list/preview/snapshot/stream)
 - Safety: conservative motion limits; bypass with `Sanbot(unsafe=True)` or `--unsafe` in CLI.
 
+## CLI vs Library
+
+- CLI location: `sanbot/mcu_bridge/usb_bridge.py`
+- Library location: `sanbot/mcu_bridge/lib/bridge.py`
+- Use the CLI for quick tests and scripts
+- Use the library from Python apps that need an API
+- Both share the same payload builders and enums
+- Both send identical bytes for the same motion intent
+- Example equivalence
+  - CLI: `python -m sanbot.mcu_bridge.usb_bridge wheels time --pattern forward --speed 80 --ms 1500`
+  - Library: `Sanbot().wheels_time('forward', 1500, speed=80)`
+
 ## Docs
 - Basic usage docs are bundled in the wheel:
   - `sanbot/mcu_bridge/USAGE.md`
