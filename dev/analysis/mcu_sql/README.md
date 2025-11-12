@@ -1,3 +1,4 @@
+<!-- Generated/updated by GitHub Copilot on 2025-11-12 at user request. -->
 # sanbot_mcu.sqlite guide
 
 This database documents Sanbot MCU commands and the payload byte layout used by the CLI.
@@ -119,3 +120,7 @@ Tip: For a friendlier UI, open the DB in DB Browser for SQLite or a VS Code SQLi
 - The schema mirrors the reverse-engineering JSON sources: `commands` corresponds to per-command metadata; `command_bytes` expands payload fields/ordering.
 - If a command’s payload packing rules are ambiguous, consult `logic_links` and `files_checklist` for original firmware references.
 - Changes to labels/ordering should be versioned; consumers (CLI) assume `byte_order` is stable.
+
+## Attribution
+
+The initial pass of reviewing the original firmware `.smali` files and generating the structured dataset that seeded this database was performed with assistance from ChatGPT Codex.
