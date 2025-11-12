@@ -1,63 +1,26 @@
 # sanbot-mcu-bridge
 
-A Python library and CLI to control Sanbot Elf S1-B2 MCUs directly over USB (no Android).
-It mirrors the original USB framing and covers wheels, motion,
-LEDs, projector, sensors, ZigBee, etc.
+A C++ library and CLI to control the Sanbot Elf S1-B2 humanoid robot over USB, bypassing the original Android controller.
 
-## Install
-```
-pip install sanbot-mcu-bridge
-```
+## The project
 
-## Quick start (library)
-```
-from sanbot.mcu_bridge.lib import Sanbot
-bot = Sanbot()
-bot.open()
-bot.wheels_time('forward', ms=800)
-bot.close()
-```
+- This project is currently under construction - it's not ready yet!
 
-## Quick start (CLI)
-```
-sanbot-usb list
-sanbot-usb listen --target bottom --verbose
-```
+This project aims to create a comprehensive and easy-to-use CLI and library to control the Sanbot Elf S1-B2 Humanoid Robot with any device the user would like, fully bypassing the original Android board. This is going to be used in a project of mine called Sunny-Sanbot, which you can find on my GitHub profile.
 
-- Camera CLI: `sanbot-camera` (list/preview/snapshot/stream)
-- Safety: conservative motion limits; bypass with `Sanbot(unsafe=True)` or `--unsafe` in CLI.
+## Roadmap
 
-## CLI vs Library
-
-- CLI location: `sanbot/mcu_bridge/usb_bridge.py`
-- Library location: `sanbot/mcu_bridge/lib/bridge.py`
-- Use the CLI for quick tests and scripts
-- Use the library from Python apps that need an API
-- Both share the same payload builders and enums
-- Both send identical bytes for the same motion intent
-- Example equivalence
-  - CLI: `python -m sanbot.mcu_bridge.usb_bridge wheels time --pattern forward --speed 80 --ms 1500`
-  - Library: `Sanbot().wheels_time('forward', 1500, speed=80)`
-
-## Docs
-- Basic usage docs are bundled in the wheel:
-  - `sanbot/mcu_bridge/USAGE.md`
-  - `sanbot/mcu_bridge/USAGE_LIBRARY.md`
-- Deep protocol docs (smali references, hardware maps) live in the development repo.
-- GUI tester: see `usage-docs/USB_BRIDGE_TESTER.md` for the interactive bridge
-  test bench with camera/microphone/USB monitoring. Includes
-  `programs/setup_pi_tester.sh` for Raspberry Pi setup and
-  `programs/usb_bridge_tester_demo.py` for a hardware-free demo mode.
-- CLI commands now auto-read a response frame (toggle with `--no-auto-read`), so
-  quick queries like `sanbot-usb battery` immediately show decoded data.
-
-## Changelog
-See `CHANGELOG.md` for release notes.
+In progress.
 
 ## Notes from the Dev
-I'd just like to note that ChatGPT Codex *was* used in this project, but it was used almost exclusively for: documentation, TODO compression, searching original firmware for files, packaging project as a library. The core functionality was pretty much exclusively written by me, @KitcatCatlord.
-This was initially written in a separate private project, so I could easily reference files I am not able to make public. If it seems unrealistic that I did so much in the initial commit or later large commits - it is.
+
+This project was prevously a python library and CLI, and all files from the old version has been moved to /Archive. This is currently being rebuilt from the ground up in C++. The python version was more of an experiment to see if this could even work, and that's been proven. Instead of debugging the python program to get everything working, this is being rebuilt from the gound up in C++ with a completely new strategy. For more details see The-Plan.md in Docs/.
+
+I'd also like to note that ChatGPT Codex has been and will be *occasionaly* used in this project, but it was used almost exclusively for: documentation, TODO compression, searching original firmware, packaging project as a library. The core functionality was pretty much exclusively written by me, @KitcatCatlord.
+
+This was initially written in a separate private project, so I could easily reference files I am not able to make public. If lots of stuff appears in a single commit and it seems odd, it's likely from there.
 
 ## License
+
 This repository is currently unlicensed.
 You may view the code, but you do not have permission to use, modify, or redistribute it outside GitHub.
