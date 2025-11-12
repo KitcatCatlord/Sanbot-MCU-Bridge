@@ -5,7 +5,7 @@ This database documents Sanbot MCU commands and the payload byte layout used by 
 ## What’s inside
 
 - `commands` — One row per MCU command.
-  - Columns: `cmd_id` (PK), `address_hex`, `command_mode_hex`, `class_name`, `file_path`, `category`, `mcu_target`, `description`.
+  - Columns: `cmd_id` (PK), `address_hex`, `command_mode_hex`, `class_name`, `file_path`, `category`, `mcu_target`, `description`, `api_group`, `api_action`, `api_name`.
 - `command_bytes` — Byte-by-byte payload schema for each command.
   - Columns: `id`, `cmd_id` (FK → commands), `byte_order` (0..N), `label`, `description`, `source_field`, `source_type`.
 - `logic_links` — Cross-references to firmware/reverse-eng symbols related to a command.
@@ -107,9 +107,9 @@ Note: The internal SQLite table `sqlite_sequence` may appear when AUTOINCREMENT 
 From the repo root:
 
 ```bash
-sqlite3 dev-docs/analysis/mcu_sql/sanbot_mcu.sqlite ".tables"
-sqlite3 dev-docs/analysis/mcu_sql/sanbot_mcu.sqlite ".schema commands"
-sqlite3 dev-docs/analysis/mcu_sql/sanbot_mcu.sqlite "SELECT * FROM commands LIMIT 10;"
+sqlite3 dev/analysis/mcu_sql/sanbot_mcu.sqlite ".tables"
+sqlite3 dev/analysis/mcu_sql/sanbot_mcu.sqlite ".schema commands"
+sqlite3 dev/analysis/mcu_sql/sanbot_mcu.sqlite "SELECT * FROM commands LIMIT 10;"
 ```
 
 Tip: For a friendlier UI, open the DB in DB Browser for SQLite or a VS Code SQLite extension, then browse `commands` → select a `cmd_id` → view its `command_bytes` rows ordered by `byte_order`.
