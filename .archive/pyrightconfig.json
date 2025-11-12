@@ -1,0 +1,13 @@
+{
+  "typeCheckingMode": "off",
+  "reportGeneralTypeIssues": false,
+  "reportOptionalSubscript": false,
+  "reportOptionalMemberAccess": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownParameterType": false,
+  "reportOptionalCall": false,
+  "reportUnusedVariable": "warning",
+  "reportUnusedImport": "warning"
+}

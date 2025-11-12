@@ -14,7 +14,7 @@ In progress.
 
 ## Notes from the Dev
 
-This project was prevously a python library and CLI, and all files from the old version has been moved to /Archive. This is currently being rebuilt from the ground up in C++. The python version was more of an experiment to see if this could even work, and that's been proven. Instead of debugging the python program to get everything working, this is being rebuilt from the gound up in C++ with a completely new strategy. For more details see The-Plan.md in Docs/.
+This project was prevously a python library and CLI, and all files from the old version has been moved to .archive. This is currently being rebuilt from the ground up in C++. The python version was more of an experiment to see if this could even work, and that's been proven. Instead of debugging the python program to get everything working, this is being rebuilt from the gound up in C++ with a completely new strategy. For more details see The-Plan.md in Docs/.
 
 I'd also like to note that ChatGPT Codex has been and will be *occasionaly* used in this project, but it was used almost exclusively for: documentation, TODO compression, searching original firmware, packaging project as a library. The core functionality was pretty much exclusively written by me, @KitcatCatlord.
 

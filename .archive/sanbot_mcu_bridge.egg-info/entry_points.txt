@@ -1,0 +1,4 @@
+[console_scripts]
+sanbot-audio = sanbot.audio_bridge.audio:cli
+sanbot-camera = sanbot.camera_bridge.camera:cli
+sanbot-usb = sanbot.mcu_bridge.usb_bridge:cli
