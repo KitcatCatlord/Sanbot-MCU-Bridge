@@ -1,0 +1,3 @@
+/Users/kianconti/dev/Projects/Sanbot/Sanbot-MCU-Bridge/programs/build/CMakeFiles/packet-builder.dir
+/Users/kianconti/dev/Projects/Sanbot/Sanbot-MCU-Bridge/programs/build/CMakeFiles/edit_cache.dir
+/Users/kianconti/dev/Projects/Sanbot/Sanbot-MCU-Bridge/programs/build/CMakeFiles/rebuild_cache.dir
