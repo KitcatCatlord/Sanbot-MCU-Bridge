@@ -1,0 +1,522 @@
+[
+  {
+    "cmd_id": 1,
+    "label": ":pswitch_1",
+    "class": "com/qihan/uvccamera/bean/WheelUSBCommand"
+  },
+  {
+    "cmd_id": 2,
+    "label": ":pswitch_2",
+    "class": "com/qihan/uvccamera/bean/HeadUSBCommand"
+  },
+  {
+    "cmd_id": 3,
+    "label": ":pswitch_3",
+    "class": "com/qihan/uvccamera/bean/HandUSBCommand"
+  },
+  {
+    "cmd_id": 4,
+    "label": ":pswitch_4",
+    "class": "com/qihan/uvccamera/bean/WhiteLightCommand"
+  },
+  {
+    "cmd_id": 5,
+    "label": ":pswitch_5",
+    "class": "com/qihan/uvccamera/bean/LEDLightCommand"
+  },
+  {
+    "cmd_id": 6,
+    "label": ":pswitch_6",
+    "class": "com/qihan/uvccamera/bean/ProjectorCommand"
+  },
+  {
+    "cmd_id": 7,
+    "label": ":pswitch_7",
+    "class": "com/qihan/uvccamera/bean/SpeakerCommand"
+  },
+  {
+    "cmd_id": 8,
+    "label": ":pswitch_8",
+    "class": "com/qihan/uvccamera/bean/AutoBatteryCommand"
+  },
+  {
+    "cmd_id": 9,
+    "label": ":pswitch_9",
+    "class": "com/qihan/uvccamera/bean/DanceCommand"
+  },
+  {
+    "cmd_id": 10,
+    "label": ":pswitch_a",
+    "class": "com/qihan/uvccamera/bean/SelfCheckedCommand"
+  },
+  {
+    "cmd_id": 11,
+    "label": ":pswitch_b",
+    "class": "com/qihan/uvccamera/bean/HeartBeatCommand"
+  },
+  {
+    "cmd_id": 12,
+    "label": ":pswitch_c",
+    "class": "com/qihan/uvccamera/bean/AutoReportCommand"
+  },
+  {
+    "cmd_id": 13,
+    "label": ":pswitch_d",
+    "class": "com/qihan/uvccamera/bean/QueryBatteryCommand"
+  },
+  {
+    "cmd_id": 14,
+    "label": ":pswitch_e",
+    "class": "com/qihan/uvccamera/bean/QueryObstacleCommand"
+  },
+  {
+    "cmd_id": 15,
+    "label": ":pswitch_f",
+    "class": "com/qihan/uvccamera/bean/BatteryChangeCommand"
+  },
+  {
+    "cmd_id": 16,
+    "label": ":pswitch_10",
+    "class": "com/qihan/uvccamera/bean/QueryBatteryCommand"
+  },
+  {
+    "cmd_id": 17,
+    "label": ":pswitch_11",
+    "class": "com/qihan/uvccamera/bean/QueryObstacleCommand"
+  },
+  {
+    "cmd_id": 18,
+    "label": ":pswitch_12",
+    "class": "com/qihan/uvccamera/bean/BatteryChangeCommand"
+  },
+  {
+    "cmd_id": 19,
+    "label": ":pswitch_13",
+    "class": "com/qihan/uvccamera/bean/BatteryTemperatureCommand"
+  },
+  {
+    "cmd_id": 20,
+    "label": ":pswitch_14",
+    "class": "com/qihan/uvccamera/bean/GyroscopeCommand"
+  },
+  {
+    "cmd_id": 21,
+    "label": ":pswitch_15",
+    "class": "com/qihan/uvccamera/bean/VoiceLocation"
+  },
+  {
+    "cmd_id": 22,
+    "label": ":pswitch_16",
+    "class": "com/qihan/uvccamera/bean/TouchSwitch"
+  },
+  {
+    "cmd_id": 23,
+    "label": ":pswitch_17",
+    "class": "com/qihan/uvccamera/bean/MotorSelfCheck"
+  },
+  {
+    "cmd_id": 24,
+    "label": ":pswitch_18",
+    "class": "com/qihan/uvccamera/bean/IRSensor"
+  },
+  {
+    "cmd_id": 25,
+    "label": ":pswitch_19",
+    "class": "com/qihan/uvccamera/bean/TouchSensor"
+  },
+  {
+    "cmd_id": 26,
+    "label": ":pswitch_1a",
+    "class": "com/qihan/uvccamera/bean/AccelerateSensor"
+  },
+  {
+    "cmd_id": 27,
+    "label": ":pswitch_1b",
+    "class": "com/qihan/uvccamera/bean/WanderCommand"
+  },
+  {
+    "cmd_id": 28,
+    "label": ":pswitch_1c",
+    "class": "com/qihan/uvccamera/bean/ProjectorImageSetting"
+  },
+  {
+    "cmd_id": 29,
+    "label": ":pswitch_1d",
+    "class": "com/qihan/uvccamera/bean/ProjectorTiXingSetting"
+  },
+  {
+    "cmd_id": 30,
+    "label": ":pswitch_1e",
+    "class": "com/qihan/uvccamera/bean/ProjectorPictureSetting"
+  },
+  {
+    "cmd_id": 31,
+    "label": ":pswitch_1f",
+    "class": "com/qihan/uvccamera/bean/ProjectorExpertMode"
+  },
+  {
+    "cmd_id": 32,
+    "label": ":pswitch_20",
+    "class": "com/qihan/uvccamera/bean/ProjectorOtherSetting"
+  },
+  {
+    "cmd_id": 33,
+    "label": ":pswitch_21",
+    "class": "com/qihan/uvccamera/bean/QueryPIRCommand"
+  },
+  {
+    "cmd_id": 34,
+    "label": ":pswitch_22",
+    "class": "com/qihan/uvccamera/bean/QueryMotorStatus"
+  },
+  {
+    "cmd_id": 35,
+    "label": ":pswitch_23",
+    "class": "com/qihan/uvccamera/bean/QueryGyroscopeStatus"
+  },
+  {
+    "cmd_id": 36,
+    "label": ":pswitch_24",
+    "class": "com/qihan/uvccamera/bean/QueryTouchSwitch"
+  },
+  {
+    "cmd_id": 37,
+    "label": ":pswitch_25",
+    "class": "com/qihan/uvccamera/bean/ProjectorTypeSetting"
+  },
+  {
+    "cmd_id": 38,
+    "label": ":pswitch_26",
+    "class": "com/qihan/uvccamera/bean/Detect3DData"
+  },
+  {
+    "cmd_id": 39,
+    "label": ":pswitch_27",
+    "class": "com/qihan/uvccamera/bean/QueryMovementStatus"
+  },
+  {
+    "cmd_id": 40,
+    "label": ":pswitch_28",
+    "class": "com/qihan/uvccamera/bean/QueryHideObstacleStatus"
+  },
+  {
+    "cmd_id": 41,
+    "label": ":pswitch_29",
+    "class": "com/qihan/uvccamera/bean/MotorLockSetting"
+  },
+  {
+    "cmd_id": 42,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 43,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 44,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 45,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 46,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 47,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 48,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 49,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 50,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 51,
+    "label": ":pswitch_2a",
+    "class": "com/qihan/uvccamera/bean/QueryIRReceiveStatus"
+  },
+  {
+    "cmd_id": 52,
+    "label": ":pswitch_2b",
+    "class": "com/qihan/uvccamera/bean/ZigbeeCommand"
+  },
+  {
+    "cmd_id": 53,
+    "label": ":pswitch_2c",
+    "class": "com/qihan/uvccamera/bean/MCUUpgradeCommand"
+  },
+  {
+    "cmd_id": 54,
+    "label": ":pswitch_2d",
+    "class": "com/qihan/uvccamera/bean/MCUResetCommand"
+  },
+  {
+    "cmd_id": 55,
+    "label": ":pswitch_2e",
+    "class": "com/qihan/uvccamera/bean/QueryUpgradeStatus"
+  },
+  {
+    "cmd_id": 56,
+    "label": ":pswitch_2f",
+    "class": "com/qihan/uvccamera/bean/QueryMCUVersion"
+  },
+  {
+    "cmd_id": 57,
+    "label": ":pswitch_30",
+    "class": "com/qihan/uvccamera/bean/ChangePileCommand"
+  },
+  {
+    "cmd_id": 58,
+    "label": ":pswitch_31",
+    "class": "com/qihan/uvccamera/bean/AutoChangeStatus"
+  },
+  {
+    "cmd_id": 59,
+    "label": ":pswitch_32",
+    "class": "com/qihan/uvccamera/bean/IllegalUseCommand"
+  },
+  {
+    "cmd_id": 60,
+    "label": ":pswitch_33",
+    "class": "com/qihan/uvccamera/bean/ProjectorOutputSetting"
+  },
+  {
+    "cmd_id": 61,
+    "label": ":pswitch_34",
+    "class": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting"
+  },
+  {
+    "cmd_id": 62,
+    "label": ":pswitch_35",
+    "class": "com/qihan/uvccamera/bean/BlackShieldSwitch"
+  },
+  {
+    "cmd_id": 63,
+    "label": ":pswitch_36",
+    "class": "com/qihan/uvccamera/bean/LiliNormalExpression"
+  },
+  {
+    "cmd_id": 64,
+    "label": ":pswitch_37",
+    "class": "com/qihan/uvccamera/bean/AmbientTemperature"
+  },
+  {
+    "cmd_id": 65,
+    "label": ":pswitch_38",
+    "class": "com/qihan/uvccamera/bean/QueryOptocouplerStatus"
+  },
+  {
+    "cmd_id": 66,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 67,
+    "label": ":pswitch_39",
+    "class": "com/qihan/uvccamera/bean/QueryIRSender"
+  },
+  {
+    "cmd_id": 68,
+    "label": ":pswitch_3a",
+    "class": "com/qihan/uvccamera/bean/BottomEncoderConnection"
+  },
+  {
+    "cmd_id": 69,
+    "label": ":pswitch_3b",
+    "class": "com/qihan/uvccamera/bean/QuerySPIFLASHStatus"
+  },
+  {
+    "cmd_id": 70,
+    "label": ":pswitch_3c",
+    "class": "com/qihan/uvccamera/bean/QueryUARTConnection"
+  },
+  {
+    "cmd_id": 71,
+    "label": ":pswitch_3d",
+    "class": "com/qihan/uvccamera/bean/QueryProjectorConnection"
+  },
+  {
+    "cmd_id": 72,
+    "label": ":pswitch_3e",
+    "class": "com/qihan/uvccamera/bean/QueryPhotoelectricSwitch"
+  },
+  {
+    "cmd_id": 73,
+    "label": ":pswitch_3f",
+    "class": "com/qihan/uvccamera/bean/FollowSwitch"
+  },
+  {
+    "cmd_id": 74,
+    "label": ":pswitch_40",
+    "class": "com/qihan/uvccamera/bean/QueryButtonStatus"
+  },
+  {
+    "cmd_id": 75,
+    "label": ":pswitch_41",
+    "class": "com/qihan/uvccamera/bean/QueryProjectorSwitch"
+  },
+  {
+    "cmd_id": 76,
+    "label": ":pswitch_42",
+    "class": "com/qihan/uvccamera/bean/PhotoelectricAbnormal"
+  },
+  {
+    "cmd_id": 77,
+    "label": ":pswitch_43",
+    "class": "com/qihan/uvccamera/bean/HideModeSwitch"
+  },
+  {
+    "cmd_id": 78,
+    "label": ":pswitch_44",
+    "class": "com/qihan/uvccamera/bean/MotorDefendCommand"
+  },
+  {
+    "cmd_id": 79,
+    "label": ":pswitch_45",
+    "class": "com/qihan/uvccamera/bean/QueryHideCatStatus"
+  },
+  {
+    "cmd_id": 80,
+    "label": ":pswitch_46",
+    "class": "com/qihan/uvccamera/bean/SetWhiteBrightness"
+  },
+  {
+    "cmd_id": 81,
+    "label": ":pswitch_47",
+    "class": "com/qihan/uvccamera/bean/QueryWhiteBrightness"
+  },
+  {
+    "cmd_id": 82,
+    "label": ":pswitch_48",
+    "class": "com/qihan/uvccamera/bean/RingArrayReset"
+  },
+  {
+    "cmd_id": 83,
+    "label": ":pswitch_49",
+    "class": "com/qihan/uvccamera/bean/RingArrayAdjust"
+  },
+  {
+    "cmd_id": 84,
+    "label": ":pswitch_4a",
+    "class": "com/qihan/uvccamera/bean/RingArrayDegree"
+  },
+  {
+    "cmd_id": 85,
+    "label": ":pswitch_4b",
+    "class": "com/qihan/uvccamera/bean/QueryExpressionVersion"
+  },
+  {
+    "cmd_id": 86,
+    "label": ":pswitch_4c",
+    "class": "com/qihan/uvccamera/bean/SetExpressionVersion"
+  },
+  {
+    "cmd_id": 87,
+    "label": ":pswitch_4d",
+    "class": "com/qihan/uvccamera/bean/QueryExpressionStatus"
+  },
+  {
+    "cmd_id": 88,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 89,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 90,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 91,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 92,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 93,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 94,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 95,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 96,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 97,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 98,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 99,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 100,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 101,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 102,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 103,
+    "label": ":pswitch_0",
+    "class": null
+  },
+  {
+    "cmd_id": 104,
+    "label": ":pswitch_4e",
+    "class": "com/qihan/uvccamera/bean/BodyRecover"
+  }
+]

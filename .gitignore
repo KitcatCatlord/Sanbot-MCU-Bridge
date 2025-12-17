@@ -1,0 +1,6 @@
+# Added by GitHub Copilot on 2025-11-12 at user request
+# Purpose: ignore the Archive directory and its contents
+# Repo: Sanbot-MCU-Bridge
+#
+# Ignore Archive directory and its contents
+/Archive/

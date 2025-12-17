@@ -1,0 +1,2640 @@
+[
+  {
+    "cmd_id": 1,
+    "address_hex": "0x01",
+    "class": "com/qihan/uvccamera/bean/WheelUSBCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/WheelUSBCommand.smali",
+    "category": "locomotion",
+    "command_mode_hex": "0x01",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelMode",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelDirection",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelLSBTime",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelMSBTime",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelDegree",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelSpeed",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelLSBDegree",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelMSBDegree",
+        "order": 9
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelSpeed",
+        "order": 10
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelLSBTime",
+        "order": 11
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelMSBTime",
+        "order": 12
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "isCircle",
+        "order": 13
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelSpeed",
+        "order": 14
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelLSBDistance",
+        "order": 15
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/WheelUSBCommand",
+        "field": "moveWheelMSBDistance",
+        "order": 16
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 2,
+    "address_hex": "0x02",
+    "class": "com/qihan/uvccamera/bean/HeadUSBCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/HeadUSBCommand.smali",
+    "category": "head",
+    "command_mode_hex": "0x02",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadMode",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadDirection",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadLSBTime",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadMSBTime",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadDegree",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadSpeed",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadLSBDegree",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadMSBDegree",
+        "order": 9
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "moveHeadSpeed",
+        "order": 10
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "horizontalLSBDegree",
+        "order": 11
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "horizontalMSBDegree",
+        "order": 12
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "verticalLSBDegree",
+        "order": 13
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "verticalMSBDegree",
+        "order": 14
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "horizontal_relative_direction",
+        "order": 15
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "horizontalDegree",
+        "order": 16
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "vertical_relative_direction",
+        "order": 17
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HeadUSBCommand",
+        "field": "verticalDegree",
+        "order": 18
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 3,
+    "address_hex": "0x03",
+    "class": "com/qihan/uvccamera/bean/HandUSBCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/HandUSBCommand.smali",
+    "category": "arm",
+    "command_mode_hex": "0x03",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x3",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandMode",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "whichHand",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandLSBTime",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandMSBTime",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandLSBDegree",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandMSBDegree",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandSpeed",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandDirection",
+        "order": 9
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandLSBDegree",
+        "order": 10
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandMSBDegree",
+        "order": 11
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandSpeed",
+        "order": 12
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/HandUSBCommand",
+        "field": "moveHandDirection",
+        "order": 13
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 4,
+    "address_hex": "0x04",
+    "class": "com/qihan/uvccamera/bean/WhiteLightCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/WhiteLightCommand.smali",
+    "category": "lighting",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 5,
+    "address_hex": "0x05",
+    "class": "com/qihan/uvccamera/bean/LEDLightCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/LEDLightCommand.smali",
+    "category": "lighting",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x0",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/LEDLightCommand",
+        "field": "switchMode",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/LEDLightCommand",
+        "field": "led_rate",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/LEDLightCommand",
+        "field": "led_random_number",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/LEDLightCommand",
+        "field": "whichLight",
+        "order": 7
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "cmd_id": 6,
+    "address_hex": "0x06",
+    "class": "com/qihan/uvccamera/bean/ProjectorCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorCommand.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 7,
+    "address_hex": "0x07",
+    "class": "com/qihan/uvccamera/bean/SpeakerCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/SpeakerCommand.smali",
+    "category": "audio",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 8,
+    "address_hex": "0x08",
+    "class": "com/qihan/uvccamera/bean/AutoBatteryCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/AutoBatteryCommand.smali",
+    "category": "power",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 9,
+    "address_hex": "0x09",
+    "class": "com/qihan/uvccamera/bean/DanceCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/DanceCommand.smali",
+    "category": "behavior",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 10,
+    "address_hex": "0x0A",
+    "class": "com/qihan/uvccamera/bean/SelfCheckedCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/SelfCheckedCommand.smali",
+    "category": "misc",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x7",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/SelfCheckedCommand",
+        "field": "type",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/SelfCheckedCommand",
+        "field": "switchMode",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "cmd_id": 11,
+    "address_hex": "0x0B",
+    "class": "com/qihan/uvccamera/bean/HeartBeatCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/HeartBeatCommand.smali",
+    "category": "misc",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 12,
+    "address_hex": "0x0C",
+    "class": "com/qihan/uvccamera/bean/AutoReportCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/AutoReportCommand.smali",
+    "category": "misc",
+    "command_mode_hex": "0x80",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 13,
+    "address_hex": "0x0D",
+    "class": "com/qihan/uvccamera/bean/QueryBatteryCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryBatteryCommand.smali",
+    "category": "power",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryBatteryCommand",
+        "field": "battery",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryBatteryCommand",
+        "field": "currentBattery",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 14,
+    "address_hex": "0x0E",
+    "class": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryObstacleCommand.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "obstacleDirection",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "distance",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data1",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data2",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data3",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data4",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data5",
+        "order": 9
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data6",
+        "order": 10
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data7",
+        "order": 11
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data8",
+        "order": 12
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data9",
+        "order": 13
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data10",
+        "order": 14
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data11",
+        "order": 15
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data12",
+        "order": 16
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data13",
+        "order": 17
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data14",
+        "order": 18
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data15",
+        "order": 19
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data16",
+        "order": 20
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data17",
+        "order": 21
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 15,
+    "address_hex": "0x0F",
+    "class": "com/qihan/uvccamera/bean/BatteryChangeCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/BatteryChangeCommand.smali",
+    "category": "power",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/BatteryChangeCommand",
+        "field": "BatteryChange",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/BatteryChangeCommand",
+        "field": "batteryStatus",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 16,
+    "address_hex": "0x10",
+    "class": "com/qihan/uvccamera/bean/QueryBatteryCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryBatteryCommand.smali",
+    "category": "power",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryBatteryCommand",
+        "field": "battery",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryBatteryCommand",
+        "field": "currentBattery",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 17,
+    "address_hex": "0x11",
+    "class": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryObstacleCommand.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "obstacleDirection",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "distance",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data1",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data2",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data3",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data4",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data5",
+        "order": 9
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data6",
+        "order": 10
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data7",
+        "order": 11
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data8",
+        "order": 12
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data9",
+        "order": 13
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data10",
+        "order": 14
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data11",
+        "order": 15
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data12",
+        "order": 16
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data13",
+        "order": 17
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data14",
+        "order": 18
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data15",
+        "order": 19
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data16",
+        "order": 20
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryObstacleCommand",
+        "field": "data17",
+        "order": 21
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 18,
+    "address_hex": "0x12",
+    "class": "com/qihan/uvccamera/bean/BatteryChangeCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/BatteryChangeCommand.smali",
+    "category": "power",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/BatteryChangeCommand",
+        "field": "BatteryChange",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/BatteryChangeCommand",
+        "field": "batteryStatus",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 19,
+    "address_hex": "0x13",
+    "class": "com/qihan/uvccamera/bean/BatteryTemperatureCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/BatteryTemperatureCommand.smali",
+    "category": "power",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 20,
+    "address_hex": "0x14",
+    "class": "com/qihan/uvccamera/bean/GyroscopeCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/GyroscopeCommand.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x82",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7e",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/GyroscopeCommand",
+        "field": "LSBDriftAngle",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/GyroscopeCommand",
+        "field": "MSBDriftAngle",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/GyroscopeCommand",
+        "field": "LSBElevation",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/GyroscopeCommand",
+        "field": "MSBElevation",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/GyroscopeCommand",
+        "field": "LSBRollAngle",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/GyroscopeCommand",
+        "field": "MSBRollAngle",
+        "order": 8
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 21,
+    "address_hex": "0x15",
+    "class": "com/qihan/uvccamera/bean/VoiceLocation",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/VoiceLocation.smali",
+    "category": "audio",
+    "command_mode_hex": "0x82",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7e",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/VoiceLocation",
+        "field": "horizontalLSBAngle",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/VoiceLocation",
+        "field": "horizontalMSBAngle",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/VoiceLocation",
+        "field": "verticalLSBAngle",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/VoiceLocation",
+        "field": "verticalMSBAngle",
+        "order": 6
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 22,
+    "address_hex": "0x16",
+    "class": "com/qihan/uvccamera/bean/TouchSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/TouchSwitch.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x83",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7d",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/TouchSwitch",
+        "field": "touchTurnal",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/TouchSwitch",
+        "field": "touchInformation",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 23,
+    "address_hex": "0x17",
+    "class": "com/qihan/uvccamera/bean/MotorSelfCheck",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/MotorSelfCheck.smali",
+    "category": "actuator",
+    "command_mode_hex": "0x83",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7d",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MotorSelfCheck",
+        "field": "selfCheckContent",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MotorSelfCheck",
+        "field": "selfCheckInformation",
+        "order": 5
+      }
+    ],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 24,
+    "address_hex": "0x18",
+    "class": "com/qihan/uvccamera/bean/IRSensor",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/IRSensor.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x83",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7d",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/IRSensor",
+        "field": "sensorContent",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/IRSensor",
+        "field": "sensorInformation",
+        "order": 5
+      }
+    ],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 25,
+    "address_hex": "0x19",
+    "class": "com/qihan/uvccamera/bean/TouchSensor",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/TouchSensor.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x83",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7d",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x3",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/TouchSensor",
+        "field": "sensorContent",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/TouchSensor",
+        "field": "sensorInformation",
+        "order": 5
+      }
+    ],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 26,
+    "address_hex": "0x1A",
+    "class": "com/qihan/uvccamera/bean/AccelerateSensor",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/AccelerateSensor.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x83",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7d",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/AccelerateSensor",
+        "field": "sensorContent",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/AccelerateSensor",
+        "field": "sensorInformation",
+        "order": 5
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 27,
+    "address_hex": "0x1B",
+    "class": "com/qihan/uvccamera/bean/WanderCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/WanderCommand.smali",
+    "category": "behavior",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 28,
+    "address_hex": "0x1C",
+    "class": "com/qihan/uvccamera/bean/ProjectorImageSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorImageSetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageSetting",
+        "field": "controlContent",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 29,
+    "address_hex": "0x1D",
+    "class": "com/qihan/uvccamera/bean/ProjectorTiXingSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorTiXingSetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorTiXingSetting",
+        "field": "switchMode",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorTiXingSetting",
+        "field": "controlContent",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorTiXingSetting",
+        "field": "horizontalDegree",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorTiXingSetting",
+        "field": "verticalDegree",
+        "order": 7
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 30,
+    "address_hex": "0x1E",
+    "class": "com/qihan/uvccamera/bean/ProjectorPictureSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorPictureSetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x3",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorPictureSetting",
+        "field": "controlContent",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorPictureSetting",
+        "field": "sub_type",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorPictureSetting",
+        "field": "degree",
+        "order": 6
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 31,
+    "address_hex": "0x1F",
+    "class": "com/qihan/uvccamera/bean/ProjectorExpertMode",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorExpertMode.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorExpertMode",
+        "field": "adjustMode",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorExpertMode",
+        "field": "controlMode",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorExpertMode",
+        "field": "controlContent",
+        "order": 6
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 32,
+    "address_hex": "0x20",
+    "class": "com/qihan/uvccamera/bean/ProjectorOtherSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorOtherSetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x5",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorOtherSetting",
+        "field": "switchMode",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 33,
+    "address_hex": "0x21",
+    "class": "com/qihan/uvccamera/bean/QueryPIRCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryPIRCommand.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x6",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryPIRCommand",
+        "field": "pir_type",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryPIRCommand",
+        "field": "pir_status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 34,
+    "address_hex": "0x22",
+    "class": "com/qihan/uvccamera/bean/QueryMotorStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryMotorStatus.smali",
+    "category": "actuator",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x7",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryMotorStatus",
+        "field": "which_part",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryMotorStatus",
+        "field": "motor_status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2
+    ]
+  },
+  {
+    "cmd_id": 35,
+    "address_hex": "0x23",
+    "class": "com/qihan/uvccamera/bean/QueryGyroscopeStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryGyroscopeStatus.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x8",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryGyroscopeStatus",
+        "field": "accelerometer_status",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryGyroscopeStatus",
+        "field": "compass_status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 36,
+    "address_hex": "0x24",
+    "class": "com/qihan/uvccamera/bean/QueryTouchSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryTouchSwitch.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x5",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryTouchSwitch",
+        "field": "touchTurnal",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryTouchSwitch",
+        "field": "touchInformation",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "cmd_id": 37,
+    "address_hex": "0x25",
+    "class": "com/qihan/uvccamera/bean/ProjectorTypeSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorTypeSetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x6",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorTypeSetting",
+        "field": "projector_type",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 38,
+    "address_hex": "0x26",
+    "class": "com/qihan/uvccamera/bean/Detect3DData",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/Detect3DData.smali",
+    "category": "misc",
+    "command_mode_hex": "0x82",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7e",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x3",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/Detect3DData",
+        "field": "distance",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 39,
+    "address_hex": "0x27",
+    "class": "com/qihan/uvccamera/bean/QueryMovementStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryMovementStatus.smali",
+    "category": "locomotion",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x9",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryMovementStatus",
+        "field": "which_part",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryMovementStatus",
+        "field": "status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2
+    ]
+  },
+  {
+    "cmd_id": 40,
+    "address_hex": "0x28",
+    "class": "com/qihan/uvccamera/bean/QueryHideObstacleStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryHideObstacleStatus.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryHideObstacleStatus",
+        "field": "which",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryHideObstacleStatus",
+        "field": "status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 41,
+    "address_hex": "0x29",
+    "class": "com/qihan/uvccamera/bean/MotorLockSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/MotorLockSetting.smali",
+    "category": "actuator",
+    "command_mode_hex": "0x05",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x5",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MotorLockSetting",
+        "field": "whichPart",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MotorLockSetting",
+        "field": "switchMode",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2
+    ]
+  },
+  {
+    "cmd_id": 42,
+    "class": null
+  },
+  {
+    "cmd_id": 43,
+    "class": null
+  },
+  {
+    "cmd_id": 44,
+    "class": null
+  },
+  {
+    "cmd_id": 45,
+    "class": null
+  },
+  {
+    "cmd_id": 46,
+    "class": null
+  },
+  {
+    "cmd_id": 47,
+    "class": null
+  },
+  {
+    "cmd_id": 48,
+    "class": null
+  },
+  {
+    "cmd_id": 49,
+    "class": null
+  },
+  {
+    "cmd_id": 50,
+    "class": null
+  },
+  {
+    "cmd_id": 51,
+    "address_hex": "0x33",
+    "class": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryIRReceiveStatus.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xb",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_number",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_head1",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_head2",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_head3",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_head4",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_head5",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryIRReceiveStatus",
+        "field": "receive_head6",
+        "order": 9
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 52,
+    "address_hex": "0x34",
+    "class": "com/qihan/uvccamera/bean/ZigbeeCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ZigbeeCommand.smali",
+    "category": "sensor",
+    "command_mode_hex": "0xA0",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 53,
+    "address_hex": "0x35",
+    "class": "com/qihan/uvccamera/bean/MCUUpgradeCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/MCUUpgradeCommand.smali",
+    "category": "firmware",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xb",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 54,
+    "address_hex": "0x36",
+    "class": "com/qihan/uvccamera/bean/MCUResetCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/MCUResetCommand.smali",
+    "category": "firmware",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xc",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x1",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MCUResetCommand",
+        "field": "time",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 55,
+    "address_hex": "0x37",
+    "class": "com/qihan/uvccamera/bean/QueryUpgradeStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryUpgradeStatus.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xc",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x0",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryUpgradeStatus",
+        "field": "type",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 56,
+    "address_hex": "0x38",
+    "class": "com/qihan/uvccamera/bean/QueryMCUVersion",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryMCUVersion.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 57,
+    "address_hex": "0x39",
+    "class": "com/qihan/uvccamera/bean/ChangePileCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ChangePileCommand.smali",
+    "category": "misc",
+    "command_mode_hex": "0xA1",
+    "payload": [],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 58,
+    "address_hex": "0x3A",
+    "class": "com/qihan/uvccamera/bean/AutoChangeStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/AutoChangeStatus.smali",
+    "category": "misc",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xe",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x0",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/AutoChangeStatus",
+        "field": "status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 59,
+    "address_hex": "0x3B",
+    "class": "com/qihan/uvccamera/bean/IllegalUseCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/IllegalUseCommand.smali",
+    "category": "misc",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xf",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x0",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 60,
+    "address_hex": "0x3C",
+    "class": "com/qihan/uvccamera/bean/ProjectorOutputSetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorOutputSetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x7",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorOutputSetting",
+        "field": "projectorImageSetting",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorOutputSetting",
+        "field": "horizontalTiXing",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorOutputSetting",
+        "field": "verticalTiXing",
+        "order": 6
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 61,
+    "address_hex": "0x3D",
+    "class": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/ProjectorImageQualitySetting.smali",
+    "category": "projector",
+    "command_mode_hex": "0x04",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x4",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0xa",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x8",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "contrast",
+        "order": 4
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "brightness",
+        "order": 5
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "chroma_u",
+        "order": 6
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "chroma_v",
+        "order": 7
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "saturation_u",
+        "order": 8
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "saturation_v",
+        "order": 9
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/ProjectorImageQualitySetting",
+        "field": "acutance",
+        "order": 10
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 62,
+    "address_hex": "0x3E",
+    "class": "com/qihan/uvccamera/bean/BlackShieldSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/BlackShieldSwitch.smali",
+    "category": "safety",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 63,
+    "address_hex": "0x3F",
+    "class": "com/qihan/uvccamera/bean/LiliNormalExpression",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/LiliNormalExpression.smali",
+    "category": "misc",
+    "command_mode_hex": "0x06",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 64,
+    "address_hex": "0x40",
+    "class": "com/qihan/uvccamera/bean/AmbientTemperature",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/AmbientTemperature.smali",
+    "category": "misc",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x10",
+        "order": 2
+      },
+      {
+        "type": "const",
+        "value": "0x0",
+        "order": 3
+      }
+    ],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 65,
+    "address_hex": "0x41",
+    "class": "com/qihan/uvccamera/bean/QueryOptocouplerStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryOptocouplerStatus.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2
+    ]
+  },
+  {
+    "cmd_id": 66,
+    "class": null
+  },
+  {
+    "cmd_id": 67,
+    "address_hex": "0x43",
+    "class": "com/qihan/uvccamera/bean/QueryIRSender",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryIRSender.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 68,
+    "address_hex": "0x44",
+    "class": "com/qihan/uvccamera/bean/BottomEncoderConnection",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/BottomEncoderConnection.smali",
+    "category": "misc",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 69,
+    "address_hex": "0x45",
+    "class": "com/qihan/uvccamera/bean/QuerySPIFLASHStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QuerySPIFLASHStatus.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 70,
+    "address_hex": "0x46",
+    "class": "com/qihan/uvccamera/bean/QueryUARTConnection",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryUARTConnection.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 71,
+    "address_hex": "0x47",
+    "class": "com/qihan/uvccamera/bean/QueryProjectorConnection",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryProjectorConnection.smali",
+    "category": "projector",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 72,
+    "address_hex": "0x48",
+    "class": "com/qihan/uvccamera/bean/QueryPhotoelectricSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryPhotoelectricSwitch.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "broadcast",
+    "point_details": [
+      3
+    ]
+  },
+  {
+    "cmd_id": 73,
+    "address_hex": "0x49",
+    "class": "com/qihan/uvccamera/bean/FollowSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/FollowSwitch.smali",
+    "category": "behavior",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "bottom",
+    "point_details": [
+      2
+    ]
+  },
+  {
+    "cmd_id": 74,
+    "address_hex": "0x4A",
+    "class": "com/qihan/uvccamera/bean/QueryButtonStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryButtonStatus.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 75,
+    "address_hex": "0x4B",
+    "class": "com/qihan/uvccamera/bean/QueryProjectorSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryProjectorSwitch.smali",
+    "category": "projector",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "head",
+    "point_details": [
+      1
+    ]
+  },
+  {
+    "cmd_id": 76,
+    "address_hex": "0x4C",
+    "class": "com/qihan/uvccamera/bean/PhotoelectricAbnormal",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/PhotoelectricAbnormal.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2
+    ]
+  },
+  {
+    "cmd_id": 77,
+    "address_hex": "0x4D",
+    "class": "com/qihan/uvccamera/bean/HideModeSwitch",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/HideModeSwitch.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 78,
+    "address_hex": "0x4E",
+    "class": "com/qihan/uvccamera/bean/MotorDefendCommand",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/MotorDefendCommand.smali",
+    "category": "actuator",
+    "command_mode_hex": "0x05",
+    "payload": [
+      {
+        "type": "const",
+        "value": "0x5",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x2",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MotorDefendCommand",
+        "field": "whichPart",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/MotorDefendCommand",
+        "field": "switchMode",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "dynamic",
+    "point_details": [
+      1,
+      2
+    ]
+  },
+  {
+    "cmd_id": 79,
+    "address_hex": "0x4F",
+    "class": "com/qihan/uvccamera/bean/QueryHideCatStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryHideCatStatus.smali",
+    "category": "sensor",
+    "command_mode_hex": "0x81",
+    "payload": [
+      {
+        "type": "const",
+        "value": "-0x7f",
+        "order": 1
+      },
+      {
+        "type": "const",
+        "value": "0x1a",
+        "order": 2
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryHideCatStatus",
+        "field": "retain_data",
+        "order": 3
+      },
+      {
+        "type": "field",
+        "owner": "com/qihan/uvccamera/bean/QueryHideCatStatus",
+        "field": "status",
+        "order": 4
+      }
+    ],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 80,
+    "address_hex": "0x50",
+    "class": "com/qihan/uvccamera/bean/SetWhiteBrightness",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/SetWhiteBrightness.smali",
+    "category": "misc",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 81,
+    "address_hex": "0x51",
+    "class": "com/qihan/uvccamera/bean/QueryWhiteBrightness",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryWhiteBrightness.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 82,
+    "address_hex": "0x52",
+    "class": "com/qihan/uvccamera/bean/RingArrayReset",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/RingArrayReset.smali",
+    "category": "audio",
+    "command_mode_hex": "0x82",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 83,
+    "address_hex": "0x53",
+    "class": "com/qihan/uvccamera/bean/RingArrayAdjust",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/RingArrayAdjust.smali",
+    "category": "audio",
+    "command_mode_hex": "0x82",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 84,
+    "address_hex": "0x54",
+    "class": "com/qihan/uvccamera/bean/RingArrayDegree",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/RingArrayDegree.smali",
+    "category": "audio",
+    "command_mode_hex": "0x82",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 85,
+    "address_hex": "0x55",
+    "class": "com/qihan/uvccamera/bean/QueryExpressionVersion",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryExpressionVersion.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 86,
+    "address_hex": "0x56",
+    "class": "com/qihan/uvccamera/bean/SetExpressionVersion",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/SetExpressionVersion.smali",
+    "category": "misc",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 87,
+    "address_hex": "0x57",
+    "class": "com/qihan/uvccamera/bean/QueryExpressionStatus",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/QueryExpressionStatus.smali",
+    "category": "telemetry",
+    "command_mode_hex": "0x81",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  },
+  {
+    "cmd_id": 88,
+    "class": null
+  },
+  {
+    "cmd_id": 89,
+    "class": null
+  },
+  {
+    "cmd_id": 90,
+    "class": null
+  },
+  {
+    "cmd_id": 91,
+    "class": null
+  },
+  {
+    "cmd_id": 92,
+    "class": null
+  },
+  {
+    "cmd_id": 93,
+    "class": null
+  },
+  {
+    "cmd_id": 94,
+    "class": null
+  },
+  {
+    "cmd_id": 95,
+    "class": null
+  },
+  {
+    "cmd_id": 96,
+    "class": null
+  },
+  {
+    "cmd_id": 97,
+    "class": null
+  },
+  {
+    "cmd_id": 98,
+    "class": null
+  },
+  {
+    "cmd_id": 99,
+    "class": null
+  },
+  {
+    "cmd_id": 100,
+    "class": null
+  },
+  {
+    "cmd_id": 101,
+    "class": null
+  },
+  {
+    "cmd_id": 102,
+    "class": null
+  },
+  {
+    "cmd_id": 103,
+    "class": null
+  },
+  {
+    "cmd_id": 104,
+    "address_hex": "0x68",
+    "class": "com/qihan/uvccamera/bean/BodyRecover",
+    "file": "tools/decompiled/main-release/smali/com/qihan/uvccamera/bean/BodyRecover.smali",
+    "category": "behavior",
+    "command_mode_hex": "0x04",
+    "payload": [],
+    "mcu_target_mode": "passthrough",
+    "point_details": []
+  }
+]

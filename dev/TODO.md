@@ -1,0 +1,4 @@
+- [ ] Write byte assembler
+- [ ] Write USB packet sender
+- [ ] Write USB packet reciever
+- [ ] Write logic for all MCU commands
