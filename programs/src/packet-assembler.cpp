@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <iostream>
@@ -20,24 +21,53 @@ struct UsbFrameParams {
 };
 
 array<uint8_t, 2> toBytes16BE(uint16_t value) {
-  uint8_t hi = (value >> 8) & 0xFF;
-  uint8_t lo = (value) & 0xFF;
-  return {hi, lo};
+  uint8_t b0 = (value >> 8) & 0xFF;
+  uint8_t b1 = (value) & 0xFF;
+  return {b0, b1};
 }
-array<uint8_t, 2> toBytes16LE(uint16_t value) {
-  uint8_t lo = value & 0xFF;
-  uint8_t hi = (value >> 8) & 0xFF;
-  return {lo, hi};
-}
-array<uint8_t, 4> toBytes21BE(uint32_t value) {
+array<uint8_t, 4> toBytes32BE(uint32_t value) {
   uint8_t b0 = (value >> 24) & 0xFF;
-  uint8_t b1 = (value >> 16) & 0xFF;
+  uint8_t b1 = (value >> 6) & 0xFF;
   uint8_t b2 = (value >> 8) & 0xFF;
   uint8_t b3 = value & 0xFF;
   return {b0, b1, b2, b3};
 }
 
+vector<int8_t> buildDeltas(const CommandPayload cmd) { // TODO: int or uint?
+  vector<int8_t> list;
+  list.push_back((int8_t)cmd.commandMode);
+
+  for (int8_t sb : cmd.orderedBytes)
+    list.push_back(static_cast<int8_t>(sb));
+
+  list.erase(std::remove(list.begin(), list.end(), static_cast<int8_t>(-1)),
+             list.end());
+
+  vector<int8_t> datas;
+
+  for (int8_t sb : list)
+    datas.push_back((uint8_t)sb);
+
+  return datas;
+}
+
+struct UsbComputed {
+  uint32_t content_len;
+  uint16_t mmnn;
+  array<uint8_t, 4> msg_size;
+  uint8_t checkSum;
+};
+
+// array<uint8_t, 4> toBytes21BE(uint32_t value) {
+//   uint8_t b0 = (value >> 24) & 0xFF;
+//   uint8_t b1 = (value >> 16) & 0xFF;
+//   uint8_t b2 = (value >> 8) & 0xFF;
+//   uint8_t b3 = value & 0xFF;
+//   return {b0, b1, b2, b3};
+// }
+
 // TODO: Figure out byte return array size for frameUSB
+//
 // array<uint8_t> frameUSB(array<uint8_t> payload, uint8_t ackFlag) {
 //   const uint16_t TYPE = 0xA505;
 //   const uint16_t SUBTYPE = 0x0000;
