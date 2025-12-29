@@ -10,7 +10,7 @@ This project aims to create a comprehensive and easy-to-use CLI and library to c
 
 ## Roadmap
 
-- [ ] Working packet send/receive to MCUs
+- [x] Working packet send/receive to MCUs
 - [ ] All commands from original robot mapped in CLI
 - [ ] Audio & Camera bridge
 - [ ] GUI control panel
