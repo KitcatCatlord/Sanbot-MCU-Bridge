@@ -12,58 +12,60 @@ static vector<uint8_t> assembleCommand(uint8_t commandMode,
   return assembleRoutedBuffer(cmd, 0x01, point_tag);
 }
 
-vector<uint8_t> buildWheelNoAngle(uint8_t action, uint8_t speed,
-                                  uint16_t duration, uint8_t durationMode) {
-  uint8_t mode = 0x01;
-  uint8_t lsb = duration & 0xFF;
-  uint8_t msb = (duration >> 8) & 0xFF;
-  vector<int8_t> ordered = {static_cast<int8_t>(mode),
-                            static_cast<int8_t>(action),
-                            static_cast<int8_t>(speed),
-                            static_cast<int8_t>(lsb),
-                            static_cast<int8_t>(msb),
-                            static_cast<int8_t>(durationMode)};
-  return assembleCommand(0x01, ordered, 0x02);
-}
+// vector<uint8_t> buildWheelNoAngle(uint8_t action, uint8_t speed,
+//                                   uint16_t duration, uint8_t durationMode) {
+//   uint8_t mode = 0x01;
+//   uint8_t lsb = duration & 0xFF;
+//   uint8_t msb = (duration >> 8) & 0xFF;
+//   vector<int8_t> ordered = {static_cast<int8_t>(mode),
+//                             static_cast<int8_t>(action),
+//                             static_cast<int8_t>(speed),
+//                             static_cast<int8_t>(lsb),
+//                             static_cast<int8_t>(msb),
+//                             static_cast<int8_t>(durationMode)};
+//   return assembleCommand(0x01, ordered, 0x02);
+// }
+// 
+// vector<uint8_t> buildWheelRelativeAngle(uint8_t action, uint8_t speed,
+//                                         uint16_t angle) {
+//   uint8_t mode = 0x02;
+//   uint8_t lsb = angle & 0xFF;
+//   uint8_t msb = (angle >> 8) & 0xFF;
+//   vector<int8_t> ordered = {static_cast<int8_t>(mode),
+//                             static_cast<int8_t>(action),
+//                             static_cast<int8_t>(speed),
+//                             static_cast<int8_t>(lsb),
+//                             static_cast<int8_t>(msb)};
+//   return assembleCommand(0x01, ordered, 0x02);
+// }
+// 
+// vector<uint8_t> buildWheelDistance(uint8_t action, uint8_t speed,
+//                                    uint16_t distance) {
+//   uint8_t mode = 0x11;
+//   uint8_t lsb = distance & 0xFF;
+//   uint8_t msb = (distance >> 8) & 0xFF;
+//   vector<int8_t> ordered = {static_cast<int8_t>(mode),
+//                             static_cast<int8_t>(action),
+//                             static_cast<int8_t>(speed),
+//                             static_cast<int8_t>(lsb),
+//                             static_cast<int8_t>(msb)};
+//   return assembleCommand(0x01, ordered, 0x02);
+// }
+// 
+// vector<uint8_t> buildWheelTimed(uint8_t action, uint16_t time,
+//                                 uint8_t degree) {
+//   uint8_t mode = 0x10;
+//   uint8_t lsb = time & 0xFF;
+//   uint8_t msb = (time >> 8) & 0xFF;
+//   vector<int8_t> ordered = {static_cast<int8_t>(mode),
+//                             static_cast<int8_t>(action),
+//                             static_cast<int8_t>(lsb),
+//                             static_cast<int8_t>(msb),
+//                             static_cast<int8_t>(degree)};
+//   return assembleCommand(0x01, ordered, 0x02);
+// }
 
-vector<uint8_t> buildWheelRelativeAngle(uint8_t action, uint8_t speed,
-                                        uint16_t angle) {
-  uint8_t mode = 0x02;
-  uint8_t lsb = angle & 0xFF;
-  uint8_t msb = (angle >> 8) & 0xFF;
-  vector<int8_t> ordered = {static_cast<int8_t>(mode),
-                            static_cast<int8_t>(action),
-                            static_cast<int8_t>(speed),
-                            static_cast<int8_t>(lsb),
-                            static_cast<int8_t>(msb)};
-  return assembleCommand(0x01, ordered, 0x02);
-}
 
-vector<uint8_t> buildWheelDistance(uint8_t action, uint8_t speed,
-                                   uint16_t distance) {
-  uint8_t mode = 0x11;
-  uint8_t lsb = distance & 0xFF;
-  uint8_t msb = (distance >> 8) & 0xFF;
-  vector<int8_t> ordered = {static_cast<int8_t>(mode),
-                            static_cast<int8_t>(action),
-                            static_cast<int8_t>(speed),
-                            static_cast<int8_t>(lsb),
-                            static_cast<int8_t>(msb)};
-  return assembleCommand(0x01, ordered, 0x02);
-}
-
-vector<uint8_t> buildWheelTimed(uint8_t action, uint16_t time,
-                                uint8_t degree) {
-  uint8_t mode = 0x10;
-  uint8_t lsb = time & 0xFF;
-  uint8_t msb = (time >> 8) & 0xFF;
-  vector<int8_t> ordered = {static_cast<int8_t>(mode),
-                            static_cast<int8_t>(action),
-                            static_cast<int8_t>(lsb),
-                            static_cast<int8_t>(msb),
-                            static_cast<int8_t>(degree)};
-  return assembleCommand(0x01, ordered, 0x02);
-}
 
 vector<uint8_t> buildArmNoAngle(uint8_t part, uint8_t speed, uint8_t action) {
   uint8_t mode = 0x01;
