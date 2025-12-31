@@ -1,19 +1,12 @@
-{
-        unique_lock<mutex> lock(mtx);
-        cv.wait(lock, [&] { return !msgQueue.empty() || !running; });
-        if (!running) break;
-        msg = msgQueue.front();
-        msgQueue.pop();
-        if (msgQueue.empty()) {
-            queueEmptyCv.notify_all();
-        }
-    }#include "usb-send.h"
+#include "usb-send.h"
 
 #ifdef __APPLE__
 #include "/opt/homebrew/include/libusb-1.0/libusb.h"
 #else
 #include <libusb-1.0/libusb.h>
 #endif
+#include <stdexcept>
+using namespace std;
 
 SanbotUsbManager::SanbotUsbManager() {
     if (libusb_init(&ctx) != 0) {
@@ -26,6 +19,7 @@ SanbotUsbManager::SanbotUsbManager() {
 SanbotUsbManager::~SanbotUsbManager() {
     running = false;
     cv.notify_all();
+    queueEmptyCv.notify_all();
     if (worker.joinable()) worker.join();
     closeDevice(bottom);
     closeDevice(head);
@@ -51,12 +45,13 @@ void SanbotUsbManager::enqueueMessage(int what, const vector<unsigned char>& dat
 }
 
 void SanbotUsbManager::sendLoop() {
-    while (running) {
+    while (true) {
         Message msg;
         {
             unique_lock<mutex> lock(mtx);
             cv.wait(lock, [&] { return !msgQueue.empty() || !running; });
-            if (!running) break;
+            if (msgQueue.empty() && !running) break;
+            if (msgQueue.empty()) continue;
             msg = msgQueue.front();
             msgQueue.pop();
         }
@@ -73,6 +68,11 @@ void SanbotUsbManager::sendLoop() {
                 break;
             default:
                 break;
+        }
+
+        {
+            lock_guard<mutex> lock(mtx);
+            if (msgQueue.empty()) notifyIdle();
         }
     }
 }
