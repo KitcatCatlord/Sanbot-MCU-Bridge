@@ -41,15 +41,15 @@ public:
         libusb_exit(ctx);
     }
 
-    void sendToHead(const vector<uint8_t>& frame) {
+    void sendToHead(const vector<unsigned char>& frame) {
         enqueueMessage(WHAT_SEND_TO_HEAD, frame);
     }
 
-    void sendToBottom(const vector<uint8_t>& frame) {
+    void sendToBottom(const vector<unsigned char>& frame) {
         enqueueMessage(WHAT_SEND_TO_BOTTOM, frame);
     }
 
-    void sendToPoint(const vector<uint8_t>& routedFrameWithTag) {
+    void sendToPoint(const vector<unsigned char>& routedFrameWithTag) {
         enqueueMessage(WHAT_SEND_TO_POINT, routedFrameWithTag);
     }
 
