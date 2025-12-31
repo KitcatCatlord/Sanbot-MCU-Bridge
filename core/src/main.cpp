@@ -4,6 +4,7 @@
 #include <cctype>
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 static string lowerString(string s) {
@@ -34,6 +35,15 @@ static bool parseU16Value(const string &s, uint16_t &out) {
   } catch (...) {
     return false;
   }
+}
+
+static void log_packet(const vector<unsigned char> &packet) {
+  for (size_t i = 0; i < packet.size(); ++i) {
+    printf("%02X", packet[i]);
+    if (i + 1 != packet.size())
+      printf(" ");
+  }
+  printf("\n");
 }
 
 static bool parseWheelAction(const string &s, uint8_t &out) {
@@ -175,243 +185,208 @@ int main(int argc, char **argv) {
   if (argc < 2)
     return 1;
 
-  string cmd = lowerString(argv[1]);
+  bool debug = false;
+  int argi = 1;
+  if (string(argv[1]) == "--debug") {
+    debug = true;
+    argi = 2;
+  }
+
+  if (argi >= argc)
+    return 1;
+
+  string cmd = lowerString(argv[argi]);
   SanbotUsbManager manager;
 
+  auto send_packet = [&](const vector<uint8_t> &packet) {
+    vector<unsigned char> buf(packet.begin(), packet.end());
+    if (debug)
+      log_packet(buf);
+    manager.sendToPoint(buf);
+  };
+
   if (cmd == "wheel-distance") {
-    if (argc != 5)
+    if (argc - argi != 4)
       return 1;
     uint8_t action, speed;
     uint16_t distance;
-    if (!parseWheelAction(argv[2], action))
+    if (!parseWheelAction(argv[argi + 1], action))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    if (!parseU16Value(argv[4], distance))
+    if (!parseU16Value(argv[argi + 3], distance))
       return 1;
-    {
-      vector<uint8_t> v = buildWheelDistance(action, speed, distance);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildWheelDistance(action, speed, distance));
     return 0;
   }
 
   if (cmd == "wheel-relative") {
-    if (argc != 5)
+    if (argc - argi != 4)
       return 1;
     uint8_t action, speed;
     uint16_t angle;
-    if (!parseWheelAction(argv[2], action))
+    if (!parseWheelAction(argv[argi + 1], action))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    if (!parseU16Value(argv[4], angle))
+    if (!parseU16Value(argv[argi + 3], angle))
       return 1;
-    {
-      vector<uint8_t> v = buildWheelRelativeAngle(action, speed, angle);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildWheelRelativeAngle(action, speed, angle));
     return 0;
   }
 
   if (cmd == "wheel-no-angle") {
-    if (argc != 6)
+    if (argc - argi != 5)
       return 1;
     uint8_t action, speed, durationMode;
     uint16_t duration;
-    if (!parseWheelAction(argv[2], action))
+    if (!parseWheelAction(argv[argi + 1], action))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    if (!parseU16Value(argv[4], duration))
+    if (!parseU16Value(argv[argi + 3], duration))
       return 1;
-    if (!parseByteValue(argv[5], durationMode))
+    if (!parseByteValue(argv[argi + 4], durationMode))
       return 1;
-    {
-      vector<uint8_t> v = buildWheelNoAngle(action, speed, duration, durationMode);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildWheelNoAngle(action, speed, duration, durationMode));
     return 0;
   }
 
   if (cmd == "wheel-timed") {
-    if (argc != 5)
+    if (argc - argi != 4)
       return 1;
     uint8_t action, degree;
     uint16_t time;
-    if (!parseWheelAction(argv[2], action))
+    if (!parseWheelAction(argv[argi + 1], action))
       return 1;
-    if (!parseU16Value(argv[3], time))
+    if (!parseU16Value(argv[argi + 2], time))
       return 1;
-    if (!parseByteValue(argv[4], degree))
+    if (!parseByteValue(argv[argi + 3], degree))
       return 1;
-    {
-      vector<uint8_t> v = buildWheelTimed(action, time, degree);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildWheelTimed(action, time, degree));
     return 0;
   }
 
   if (cmd == "arm-no-angle") {
-    if (argc != 5)
+    if (argc - argi != 4)
       return 1;
     uint8_t part, speed, action;
-    if (!parseArmPart(argv[2], part))
+    if (!parseArmPart(argv[argi + 1], part))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    if (!parseArmAction(argv[4], action))
+    if (!parseArmAction(argv[argi + 3], action))
       return 1;
-    {
-      vector<uint8_t> v = buildArmNoAngle(part, speed, action);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildArmNoAngle(part, speed, action));
     return 0;
   }
 
   if (cmd == "arm-relative") {
-    if (argc != 6)
+    if (argc - argi != 5)
       return 1;
     uint8_t part, speed, action;
     uint16_t angle;
-    if (!parseArmPart(argv[2], part))
+    if (!parseArmPart(argv[argi + 1], part))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    if (!parseArmAction(argv[4], action))
+    if (!parseArmAction(argv[argi + 3], action))
       return 1;
-    if (!parseU16Value(argv[5], angle))
+    if (!parseU16Value(argv[argi + 4], angle))
       return 1;
-    {
-      vector<uint8_t> v = buildArmRelativeAngle(part, speed, action, angle);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildArmRelativeAngle(part, speed, action, angle));
     return 0;
   }
 
   if (cmd == "arm-absolute") {
-    if (argc != 5)
+    if (argc - argi != 4)
       return 1;
     uint8_t part, speed;
     uint16_t angle;
-    if (!parseArmPart(argv[2], part))
+    if (!parseArmPart(argv[argi + 1], part))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    if (!parseU16Value(argv[4], angle))
+    if (!parseU16Value(argv[argi + 3], angle))
       return 1;
-    {
-      vector<uint8_t> v = buildArmAbsoluteAngle(part, speed, angle);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildArmAbsoluteAngle(part, speed, angle));
     return 0;
   }
 
   if (cmd == "head-no-angle") {
-    if (argc != 4)
+    if (argc - argi != 3)
       return 1;
     uint8_t action, speed;
-    if (!parseHeadAction(argv[2], action))
+    if (!parseHeadAction(argv[argi + 1], action))
       return 1;
-    if (!parseByteValue(argv[3], speed))
+    if (!parseByteValue(argv[argi + 2], speed))
       return 1;
-    {
-      vector<uint8_t> v = buildHeadNoAngle(action, speed);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildHeadNoAngle(action, speed));
     return 0;
   }
 
   if (cmd == "head-relative") {
-    if (argc != 4)
+    if (argc - argi != 3)
       return 1;
     uint8_t action;
     uint16_t angle;
-    if (!parseHeadAction(argv[2], action))
+    if (!parseHeadAction(argv[argi + 1], action))
       return 1;
-    if (!parseU16Value(argv[3], angle))
+    if (!parseU16Value(argv[argi + 2], angle))
       return 1;
-    {
-      vector<uint8_t> v = buildHeadRelativeAngle(action, angle);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildHeadRelativeAngle(action, angle));
     return 0;
   }
 
   if (cmd == "head-absolute") {
-    if (argc != 4)
+    if (argc - argi != 3)
       return 1;
     uint8_t action;
     uint16_t angle;
-    if (!parseHeadAbsoluteAction(argv[2], action))
+    if (!parseHeadAbsoluteAction(argv[argi + 1], action))
       return 1;
-    if (!parseU16Value(argv[3], angle))
+    if (!parseU16Value(argv[argi + 2], angle))
       return 1;
-    {
-      vector<uint8_t> v = buildHeadAbsoluteAngle(action, angle);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildHeadAbsoluteAngle(action, angle));
     return 0;
   }
 
   if (cmd == "head-locate-absolute") {
-    if (argc != 5)
+    if (argc - argi != 4)
       return 1;
     uint8_t action;
     uint16_t hAngle, vAngle;
-    if (!parseHeadLockAction(argv[2], action))
+    if (!parseHeadLockAction(argv[argi + 1], action))
       return 1;
-    if (!parseU16Value(argv[3], hAngle))
+    if (!parseU16Value(argv[argi + 2], hAngle))
       return 1;
-    if (!parseU16Value(argv[4], vAngle))
+    if (!parseU16Value(argv[argi + 3], vAngle))
       return 1;
-    {
-      vector<uint8_t> v = buildHeadLocateAbsolute(action, hAngle, vAngle);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildHeadLocateAbsolute(action, hAngle, vAngle));
     return 0;
   }
 
   if (cmd == "head-locate-relative") {
-    if (argc != 7)
+    if (argc - argi != 6)
       return 1;
     uint8_t action, hAngle, vAngle, hDirection, vDirection;
-    if (!parseHeadLockAction(argv[2], action))
+    if (!parseHeadLockAction(argv[argi + 1], action))
       return 1;
-    if (!parseByteValue(argv[3], hAngle))
+    if (!parseByteValue(argv[argi + 2], hAngle))
       return 1;
-    if (!parseByteValue(argv[4], vAngle))
+    if (!parseByteValue(argv[argi + 3], vAngle))
       return 1;
-    if (!parseHeadDirection(argv[5], hDirection))
+    if (!parseHeadDirection(argv[argi + 4], hDirection))
       return 1;
-    if (!parseHeadDirection(argv[6], vDirection))
+    if (!parseHeadDirection(argv[argi + 5], vDirection))
       return 1;
-    {
-      vector<uint8_t> v = buildHeadLocateRelative(action, hAngle, vAngle,
-                                                hDirection, vDirection);
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildHeadLocateRelative(action, hAngle, vAngle,
+                                        hDirection, vDirection));
     return 0;
   }
 
   if (cmd == "head-centre") {
-    {
-      vector<uint8_t> v = buildHeadCentreLock();
-      vector<unsigned char> buf(v.begin(), v.end());
-      manager.sendToPoint(buf);
-    }
+    send_packet(buildHeadCentreLock());
     return 0;
   }
 
