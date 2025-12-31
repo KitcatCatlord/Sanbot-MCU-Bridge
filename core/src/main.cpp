@@ -189,7 +189,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[4], distance))
       return 1;
-    manager.sendToPoint(buildWheelDistance(action, speed, distance));
+    {
+      vector<uint8_t> v = buildWheelDistance(action, speed, distance);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -204,7 +208,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[4], angle))
       return 1;
-    manager.sendToPoint(buildWheelRelativeAngle(action, speed, angle));
+    {
+      vector<uint8_t> v = buildWheelRelativeAngle(action, speed, angle);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -221,7 +229,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseByteValue(argv[5], durationMode))
       return 1;
-    manager.sendToPoint(buildWheelNoAngle(action, speed, duration, durationMode));
+    {
+      vector<uint8_t> v = buildWheelNoAngle(action, speed, duration, durationMode);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -236,7 +248,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseByteValue(argv[4], degree))
       return 1;
-    manager.sendToPoint(buildWheelTimed(action, time, degree));
+    {
+      vector<uint8_t> v = buildWheelTimed(action, time, degree);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -250,7 +266,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseArmAction(argv[4], action))
       return 1;
-    manager.sendToPoint(buildArmNoAngle(part, speed, action));
+    {
+      vector<uint8_t> v = buildArmNoAngle(part, speed, action);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -267,7 +287,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[5], angle))
       return 1;
-    manager.sendToPoint(buildArmRelativeAngle(part, speed, action, angle));
+    {
+      vector<uint8_t> v = buildArmRelativeAngle(part, speed, action, angle);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -282,7 +306,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[4], angle))
       return 1;
-    manager.sendToPoint(buildArmAbsoluteAngle(part, speed, angle));
+    {
+      vector<uint8_t> v = buildArmAbsoluteAngle(part, speed, angle);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -294,7 +322,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseByteValue(argv[3], speed))
       return 1;
-    manager.sendToPoint(buildHeadNoAngle(action, speed));
+    {
+      vector<uint8_t> v = buildHeadNoAngle(action, speed);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -307,7 +339,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[3], angle))
       return 1;
-    manager.sendToPoint(buildHeadRelativeAngle(action, angle));
+    {
+      vector<uint8_t> v = buildHeadRelativeAngle(action, angle);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -320,7 +356,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[3], angle))
       return 1;
-    manager.sendToPoint(buildHeadAbsoluteAngle(action, angle));
+    {
+      vector<uint8_t> v = buildHeadAbsoluteAngle(action, angle);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -335,7 +375,11 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseU16Value(argv[4], vAngle))
       return 1;
-    manager.sendToPoint(buildHeadLocateAbsolute(action, hAngle, vAngle));
+    {
+      vector<uint8_t> v = buildHeadLocateAbsolute(action, hAngle, vAngle);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
@@ -353,13 +397,21 @@ int main(int argc, char **argv) {
       return 1;
     if (!parseHeadDirection(argv[6], vDirection))
       return 1;
-    manager.sendToPoint(buildHeadLocateRelative(action, hAngle, vAngle,
-                                                hDirection, vDirection));
+    {
+      vector<uint8_t> v = buildHeadLocateRelative(action, hAngle, vAngle,
+                                                hDirection, vDirection);
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
   if (cmd == "head-centre") {
-    manager.sendToPoint(buildHeadCentreLock());
+    {
+      vector<uint8_t> v = buildHeadCentreLock();
+      vector<unsigned char> buf(v.begin(), v.end());
+      manager.sendToPoint(buf);
+    }
     return 0;
   }
 
