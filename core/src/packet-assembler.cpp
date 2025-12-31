@@ -1,25 +1,6 @@
+#include "packet-assembler.h"
 #include <algorithm>
-#include <array>
-#include <cstdint>
-#include <iostream>
-#include <vector>
 using namespace std;
-
-int main() { cout << "Placeholder"; }
-
-struct CommandPayload {
-  uint8_t commandMode;
-  vector<int8_t> orderedBytes;
-};
-
-struct UsbFrameParams {
-  uint8_t ack_flg;
-  uint16_t type = 0xA403;
-  uint16_t subtype = 0x0000;
-  uint16_t frame_head = 0xFFA5;
-  array<uint8_t, 7> unuse = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  const int MSG_HEAD_LEN = 0x10;
-};
 
 array<uint8_t, 2> toBytes16BE(uint16_t value) {
   uint8_t b0 = (value >> 8) & 0xFF;
@@ -54,13 +35,6 @@ vector<uint8_t> buildDatas(const CommandPayload &cmd) {
 
   return datas;
 }
-
-struct UsbComputed {
-  uint32_t content_len;
-  uint16_t mmnn;
-  array<uint8_t, 4> msg_size;
-  uint8_t checkSum;
-};
 
 UsbComputed computeUsbFieldsAndChecksum(const UsbFrameParams &params,
                                         const vector<uint8_t> &datas) {
@@ -108,14 +82,14 @@ vector<uint8_t> buildUsbFrame(const UsbFrameParams &params,
   return frame;
 }
 
-vector<uint8_t> appendPointTagForRouting(const vector<uint8_t>& usbFrame,
+vector<uint8_t> appendPointTagForRouting(const vector<uint8_t> &usbFrame,
                                          uint8_t point_tag) {
   vector<uint8_t> routed = usbFrame;
   routed.push_back(point_tag);
   return routed;
 }
 
-vector<uint8_t> assembleUsbFrameFromCommand(const CommandPayload& cmd,
+vector<uint8_t> assembleUsbFrameFromCommand(const CommandPayload &cmd,
                                             uint8_t ack_flg) {
   UsbFrameParams params;
   params.ack_flg = ack_flg;
@@ -124,7 +98,7 @@ vector<uint8_t> assembleUsbFrameFromCommand(const CommandPayload& cmd,
   return buildUsbFrame(params, datas);
 }
 
-vector<uint8_t> assembleRoutedBuffer(const CommandPayload& cmd, uint8_t ack_flg,
+vector<uint8_t> assembleRoutedBuffer(const CommandPayload &cmd, uint8_t ack_flg,
                                      uint8_t point_tag) {
   vector<uint8_t> usbFrame = assembleUsbFrameFromCommand(cmd, ack_flg);
   return appendPointTagForRouting(usbFrame, point_tag);
