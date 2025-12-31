@@ -1,4 +1,13 @@
-#include "usb-send.h"
+{
+        unique_lock<mutex> lock(mtx);
+        cv.wait(lock, [&] { return !msgQueue.empty() || !running; });
+        if (!running) break;
+        msg = msgQueue.front();
+        msgQueue.pop();
+        if (msgQueue.empty()) {
+            queueEmptyCv.notify_all();
+        }
+    }#include "usb-send.h"
 
 #ifdef __APPLE__
 #include "/opt/homebrew/include/libusb-1.0/libusb.h"
@@ -208,4 +217,13 @@ void SanbotUsbManager::closeDevice(EndpointSet& dev) {
     dev.inEp = 0;
     dev.iface = -1;
     dev.failCount = 0;
+}
+
+void SanbotUsbManager::notifyIdle() {
+    queueEmptyCv.notify_all();
+}
+
+void SanbotUsbManager::waitForPendingSends() {
+    unique_lock<mutex> lock(mtx);
+    queueEmptyCv.wait(lock, [&] { return msgQueue.empty(); });
 }

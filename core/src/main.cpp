@@ -2,6 +2,7 @@
 #include "usb-send.h"
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -200,9 +201,9 @@ int main(int argc, char **argv) {
 
   auto send_packet = [&](const vector<uint8_t> &packet) {
     vector<unsigned char> buf(packet.begin(), packet.end());
-    if (debug)
-      log_packet(buf);
+    if (debug) log_packet(buf);
     manager.sendToPoint(buf);
+    manager.waitForPendingSends();
   };
 
   if (cmd == "wheel-distance") {

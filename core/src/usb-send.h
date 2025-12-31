@@ -1,13 +1,12 @@
 #pragma once
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <queue>
-#include <vector>
-#include <cstdint>
 #include <atomic>
-#include <stdexcept>
+#include <condition_variable>
+#include <cstdint>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
 
 using namespace std;
 
@@ -35,6 +34,7 @@ public:
     void sendToHead(const vector<unsigned char>& frame);
     void sendToBottom(const vector<unsigned char>& frame);
     void sendToPoint(const vector<unsigned char>& routedFrameWithTag);
+    void waitForPendingSends();
 
 private:
     struct EndpointSet {
@@ -57,6 +57,7 @@ private:
     thread worker;
     mutex mtx;
     condition_variable cv;
+    condition_variable queueEmptyCv;
     queue<Message> msgQueue;
     atomic<bool> running{false};
 
@@ -66,4 +67,5 @@ private:
     void sendBufferTo(EndpointSet& dev, uint16_t pid, const vector<unsigned char>& buf);
     void openDevice(EndpointSet& dev, uint16_t pid);
     void closeDevice(EndpointSet& dev);
+    void notifyIdle();
 };
