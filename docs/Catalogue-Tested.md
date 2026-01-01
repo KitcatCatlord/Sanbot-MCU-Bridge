@@ -16,7 +16,11 @@ Head:
     - left-down
     - right-up
     - right-down
+- head-centre
 
+Wheels:
+- wheel-relative
+    - forward
 
 ### Not working
 
@@ -25,6 +29,10 @@ Head:
     - vertical-reset
     - horizontal-reset
     - centre-reset
+
+Wheels:
+- wheel-distance
+    - right - goes left
 
 ## Untested
 
