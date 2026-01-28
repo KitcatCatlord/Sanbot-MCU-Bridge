@@ -326,12 +326,18 @@ int main(int argc, char **argv) {
   }
 
   if (cmd == "head-relative") {
-    if (argc - argi != 3)
+    if (argc - argi != 3 && argc - argi != 2)
       return 1;
     uint8_t action;
-    uint16_t angle;
     if (!parseHeadAction(argv[argi + 1], action))
       return 1;
+    if (argc - argi == 2) {
+      if (action != 0x09 && action != 0x0A && action != 0x0B)
+        return 1;
+      send_packet(buildHeadNoAngle(action, 0x00));
+      return 0;
+    }
+    uint16_t angle;
     if (!parseU16Value(argv[argi + 2], angle))
       return 1;
     send_packet(buildHeadRelativeAngle(action, angle));
