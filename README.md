@@ -4,7 +4,7 @@ A C++ library and CLI to control the Sanbot Elf S1-B2 humanoid robot over USB, b
 
 ## The project
 
-**This project is currently ins development - it's not ready yet!**
+**This project is currently in development - it's not ready yet!**
 
 This project aims to create a comprehensive and easy-to-use CLI and library to control the Sanbot Elf S1-B2 from (almost) any device, fully bypassing the original Android board. This will be used in a project of mine called Sunny-Sanbot, which you can find on my GitHub profile.
 
