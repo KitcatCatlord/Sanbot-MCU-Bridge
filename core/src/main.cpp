@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <memory>
 #include <string>
 #include <vector>
 using namespace std;
@@ -38,12 +39,14 @@ static bool parseU16Value(const string &s, uint16_t &out) {
 }
 
 static void log_packet(const vector<unsigned char> &packet) {
+  printf("[VERBOSE] ");
   for (size_t i = 0; i < packet.size(); ++i) {
     printf("%02X", packet[i]);
     if (i + 1 != packet.size())
       printf(" ");
   }
   printf("\n");
+  fflush(stdout);
 }
 
 static bool parseWheelAction(const string &s, uint8_t &out) {
@@ -186,24 +189,64 @@ int main(int argc, char **argv) {
     return 1;
 
   bool debug = false;
+  bool test = false;
   int argi = 1;
-  if (string(argv[1]) == "--debug") {
-    debug = true;
-    argi = 2;
+  while (argi < argc) {
+    string flag = argv[argi];
+    if (flag == "--debug" || flag == "--verbose") {
+      debug = true;
+      argi++;
+      continue;
+    }
+    if (flag == "--test" || flag == "--dry-run") {
+      test = true;
+      argi++;
+      continue;
+    }
+    break;
   }
 
   if (argi >= argc)
     return 1;
 
   string cmd = lowerString(argv[argi]);
-  SanbotUsbManager manager;
+  unique_ptr<SanbotUsbManager> manager;
+  if (!test) {
+    manager = make_unique<SanbotUsbManager>();
+  }
 
   auto send_packet = [&](const vector<uint8_t> &packet) {
     vector<unsigned char> buf(packet.begin(), packet.end());
+    if (!test && manager) {
+      manager->sendToPoint(buf);
+      manager->waitForPendingSends();
+    }
     if (debug) log_packet(buf);
-    manager.sendToPoint(buf);
-    manager.waitForPendingSends();
+    if (test) {
+      printf("[TEST] Skipped USB send\n");
+      fflush(stdout);
+    }
   };
+
+  if (cmd == "hex-send") {
+    if (argc - argi < 2)
+      return 1;
+    vector<uint8_t> bytes;
+    for (int i = argi + 1; i < argc; ++i) {
+      uint8_t byte;
+      try {
+        int val = stoi(argv[i], nullptr, 16);
+        if (val < 0 || val > 255)
+          return 1;
+        byte = static_cast<uint8_t>(val);
+      } catch (...) {
+        return 1;
+      }
+      bytes.push_back(byte);
+    }
+    send_packet(bytes);
+    return 0;
+  }
 
   if (cmd == "wheel-distance") {
     if (argc - argi != 4)
