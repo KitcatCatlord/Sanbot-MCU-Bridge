@@ -554,10 +554,19 @@ private:
         return matches || childMatches;
     }
 
+    void cleanupActivePanel() {
+        if (activeWidgets.panel) {
+            commandStack->removeWidget(activeWidgets.panel);
+            delete activeWidgets.panel;
+            activeWidgets.panel = nullptr;
+        }
+    }
+
     void selectCommand() {
         auto items = commandTree->selectedItems();
         if (items.isEmpty()) {
             commandStack->setCurrentIndex(0);
+            cleanupActivePanel();
             activeWidgets = CommandWidgets{};
             return;
         }
@@ -565,10 +574,13 @@ private:
         auto it = commandIndex.find(item);
         if (it == commandIndex.end()) {
             commandStack->setCurrentIndex(0);
+            cleanupActivePanel();
             activeWidgets = CommandWidgets{};
             return;
         }
         auto &definition = commands[it->second];
+        // Remove old widget to prevent memory leak
+        cleanupActivePanel();
         activeWidgets = definition.builder();
         commandStack->addWidget(activeWidgets.panel);
         commandStack->setCurrentWidget(activeWidgets.panel);
