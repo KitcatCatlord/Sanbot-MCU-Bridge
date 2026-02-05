@@ -868,7 +868,7 @@ private:
         outputLog->append(QString("Terminal: %1").arg(command));
 
         auto platform = QSysInfo::productType();
-        if (platform == "osx") {
+        if (platform == "osx" || platform == "macos") {
             QProcess::startDetached("open", {"-a", "Terminal.app", "-n", "--args", "sh", "-c", command});
             return;
         }
