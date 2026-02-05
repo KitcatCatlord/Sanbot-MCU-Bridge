@@ -869,7 +869,7 @@ private:
 
         auto platform = QSysInfo::productType();
         if (platform == "osx") {
-            QProcess::startDetached("open", {"-a", "Terminal", command});
+            QProcess::startDetached("open", {"-a", "Terminal.app", "-n", "--args", "sh", "-c", command});
             return;
         }
         if (platform == "windows") {
