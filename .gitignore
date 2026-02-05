@@ -4,3 +4,20 @@
 #
 # Ignore Archive directory and its contents
 /Archive/
+
+# macOS
+.DS_Store
+
+# CMake / build outputs
+**/build*/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile
+**/*.cmake.user
+**/compile_commands.json
+
+# Ninja (if used)
+**/.ninja_*
+**/build.ninja
+**/rules.ninja
