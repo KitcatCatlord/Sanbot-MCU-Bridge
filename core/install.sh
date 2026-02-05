@@ -1,3 +1,4 @@
+#!/bin/bash
 set -euo pipefail
 
 g++ -std=c++20 src/main.cpp src/control-catalogue.cpp src/packet-assembler.cpp src/usb-send.cpp -o sanbot-mcu-bridge -lusb-1.0
