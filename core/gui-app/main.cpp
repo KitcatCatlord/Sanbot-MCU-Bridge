@@ -579,10 +579,8 @@ private:
             return;
         }
         auto &definition = commands[it->second];
-        
         // Remove old widget to prevent memory leak
         cleanupActivePanel();
-        
         activeWidgets = definition.builder();
         commandStack->addWidget(activeWidgets.panel);
         commandStack->setCurrentWidget(activeWidgets.panel);
