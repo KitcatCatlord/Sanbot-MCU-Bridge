@@ -11,10 +11,26 @@ This project aims to create a comprehensive and easy-to-use CLI and library to c
 ## Roadmap
 
 - [x] Working packet send/receive to MCUs
-- [ ] All commands from original robot mapped in CLI
+- [x] Database-backed command catalogue exposed to the CLI/library
+- [ ] Hardware-test every database-backed command
 - [ ] Audio & Camera bridge
-- [ ] GUI control panel
 - [ ] C++ library
+
+## Database-backed commands
+
+The C++ core can now load `mcu-command-database/sanbot_mcu_commands.sqlite`
+and build packets from the normalized command tables instead of requiring a
+new C++ function for every command.
+
+```sh
+sanbot-mcu-bridge commands
+sanbot-mcu-bridge describe-command wheel
+sanbot-mcu-bridge --test --debug send-command wheel mode=distance direction=forward speed=50 distance=1000
+```
+
+Use `--db /path/to/sanbot_mcu_commands.sqlite` or
+`SANBOT_MCU_COMMAND_DB=/path/to/sanbot_mcu_commands.sqlite` if the default
+database discovery cannot find the repo-local database.
 
 ## Notes from the dev
 

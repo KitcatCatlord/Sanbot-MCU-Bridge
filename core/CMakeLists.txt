@@ -1,17 +1,30 @@
 cmake_minimum_required(VERSION 3.10)
 project(sanbot-mcu-bridge)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Widgets)
-
+find_package(SQLite3)
 find_package(PkgConfig)
-option(SANBOT_BUILD_CLI "Build the sanbot-mcu-bridge CLI" ON)
 if(APPLE)
-  # Most macOS users only need the GUI; the CLI depends on libusb being installed.
-  set(SANBOT_BUILD_CLI OFF CACHE BOOL "Build the sanbot-mcu-bridge CLI" FORCE)
+  # The CLI depends on libusb; default off on macOS but keep explicit opt-in working.
+  option(SANBOT_BUILD_CLI "Build the sanbot-mcu-bridge CLI" OFF)
+else()
+  option(SANBOT_BUILD_CLI "Build the sanbot-mcu-bridge CLI" ON)
+endif()
+option(SANBOT_BUILD_COMMAND_DB_SMOKE "Build the database command smoke test" ON)
+
+if(SQLite3_FOUND)
+  add_library(sanbot-mcu-core STATIC
+    src/control-catalogue.cpp
+    src/command-database.cpp
+    src/packet-assembler.cpp
+  )
+
+  target_include_directories(sanbot-mcu-core PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
+  target_link_libraries(sanbot-mcu-core PUBLIC SQLite::SQLite3)
+else()
+  message(WARNING "SQLite3 not found; skipping sanbot-mcu-core and database-backed commands.")
 endif()
 
 if(SANBOT_BUILD_CLI)
@@ -19,24 +32,27 @@ if(SANBOT_BUILD_CLI)
     pkg_check_modules(LIBUSB QUIET IMPORTED_TARGET libusb-1.0)
   endif()
 
-  if(TARGET PkgConfig::LIBUSB)
+  if(TARGET PkgConfig::LIBUSB AND TARGET sanbot-mcu-core)
     add_executable(sanbot-mcu-bridge
       src/main.cpp
-      src/control-catalogue.cpp
-      src/packet-assembler.cpp
       src/usb-send.cpp
     )
 
-    target_link_libraries(sanbot-mcu-bridge PkgConfig::LIBUSB)
+    target_link_libraries(sanbot-mcu-bridge sanbot-mcu-core PkgConfig::LIBUSB)
   else()
-    message(WARNING "libusb-1.0 not found; skipping sanbot-mcu-bridge (CLI). Install libusb-1.0 to enable it.")
+    message(WARNING "libusb-1.0 or sanbot-mcu-core not found; skipping sanbot-mcu-bridge (CLI). Install libusb-1.0 and SQLite3 to enable it.")
   endif()
 endif()
 
-if(Qt5Widgets_FOUND)
-  add_executable(sanbot-mcu-gui
-    gui-app/main.cpp
+if(SANBOT_BUILD_COMMAND_DB_SMOKE AND TARGET sanbot-mcu-core)
+  enable_testing()
+  add_executable(sanbot-command-db-smoke
+    src/command-database-smoke.cpp
   )
-
-  target_link_libraries(sanbot-mcu-gui Qt5::Widgets)
+  target_link_libraries(sanbot-command-db-smoke sanbot-mcu-core)
+  add_test(
+    NAME command-database-smoke
+    COMMAND sanbot-command-db-smoke
+      ${CMAKE_CURRENT_SOURCE_DIR}/../mcu-command-database/sanbot_mcu_commands.sqlite
+  )
 endif()

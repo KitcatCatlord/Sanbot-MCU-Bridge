@@ -1,8 +1,11 @@
 #include "control-catalogue.h"
+#include "command-database.h"
 #include "usb-send.h"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <exception>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -184,12 +187,76 @@ static bool parseHeadDirection(const string &s, uint8_t &out) {
   return true;
 }
 
+static void printUsage(const char *argv0) {
+  fprintf(stderr,
+          "Usage:\n"
+          "  %s [--db PATH] [--debug] [--test] commands\n"
+          "  %s [--db PATH] describe-command NAME\n"
+          "  %s [--db PATH] [--target head|bottom|both] [--debug] [--test] "
+          "send-command NAME key=value...\n"
+          "  %s [--debug] [--test] <legacy-command> ...\n",
+          argv0, argv0, argv0, argv0);
+}
+
+static string defaultDatabasePath(const char *argv0) {
+  namespace fs = std::filesystem;
+  fs::path exe = fs::absolute(argv0);
+  return sanbot::CommandDatabase::findDefaultDatabasePath(
+      exe.has_parent_path() ? exe.parent_path().string() : string{});
+}
+
+static void printCommandList(const sanbot::CommandDatabase &db) {
+  for (const auto &command : db.commands()) {
+    printf("%-30s %-22s", command.canonicalName.c_str(),
+           command.commandGroup.c_str());
+    if (!command.aliases.empty()) {
+      printf(" aliases:");
+      for (const auto &alias : command.aliases)
+        printf(" %s", alias.c_str());
+    }
+    printf("\n");
+  }
+}
+
+static void printCommandDescription(const sanbot::CommandInfo &command) {
+  printf("%s\n", command.canonicalName.c_str());
+  printf("  group: %s\n", command.commandGroup.c_str());
+  printf("  target: %s\n", command.targetName.c_str());
+  printf("  ack: %s\n", command.ackDefaultHex.c_str());
+  if (!command.routeTagHex.empty())
+    printf("  route tag: %s\n", command.routeTagHex.c_str());
+  printf("  aliases:");
+  for (const auto &alias : command.aliases)
+    printf(" %s", alias.c_str());
+  printf("\n");
+  printf("  template: %s\n", command.payloadTemplate.c_str());
+  printf("  parameters:\n");
+  for (const auto &parameter : command.parameters) {
+    if (parameter.fieldName == "commandMode" ||
+        parameter.fieldRole == "command_mode")
+      continue;
+    printf("    %-28s role=%s", parameter.fieldName.c_str(),
+           parameter.fieldRole.c_str());
+    if (!parameter.valueHex.empty())
+      printf(" const=%s", parameter.valueHex.c_str());
+    else if (!parameter.valueExpr.empty())
+      printf(" value=%s", parameter.valueExpr.c_str());
+    if (!parameter.conditionExpr.empty())
+      printf(" when %s", parameter.conditionExpr.c_str());
+    printf("\n");
+  }
+}
+
 int main(int argc, char **argv) {
-  if (argc < 2)
+  if (argc < 2) {
+    printUsage(argv[0]);
     return 1;
+  }
 
   bool debug = false;
   bool test = false;
+  string dbPath;
+  string directTarget;
   int argi = 1;
   while (argi < argc) {
     string flag = argv[argi];
@@ -203,23 +270,56 @@ int main(int argc, char **argv) {
       argi++;
       continue;
     }
+    if (flag == "--db") {
+      if (argi + 1 >= argc) {
+        printUsage(argv[0]);
+        return 1;
+      }
+      dbPath = argv[argi + 1];
+      argi += 2;
+      continue;
+    }
+    if (flag == "--target") {
+      if (argi + 1 >= argc) {
+        printUsage(argv[0]);
+        return 1;
+      }
+      directTarget = lowerString(argv[argi + 1]);
+      argi += 2;
+      continue;
+    }
+    if (flag == "--help" || flag == "-h") {
+      printUsage(argv[0]);
+      return 0;
+    }
     break;
   }
 
-  if (argi >= argc)
+  if (argi >= argc) {
+    printUsage(argv[0]);
     return 1;
+  }
 
   string cmd = lowerString(argv[argi]);
   unique_ptr<SanbotUsbManager> manager;
-  if (!test) {
-    manager = make_unique<SanbotUsbManager>();
-  }
+
+  auto open_database = [&]() {
+    return sanbot::CommandDatabase(
+        dbPath.empty() ? defaultDatabasePath(argv[0]) : dbPath);
+  };
+
+  auto ensure_manager = [&]() -> SanbotUsbManager * {
+    if (!test && !manager)
+      manager = make_unique<SanbotUsbManager>();
+    return manager.get();
+  };
 
   auto send_packet = [&](const vector<uint8_t> &packet) {
     vector<unsigned char> buf(packet.begin(), packet.end());
-    if (!test && manager) {
-      manager->sendToPoint(buf);
-      manager->waitForPendingSends();
+    if (!test) {
+      SanbotUsbManager *usb = ensure_manager();
+      usb->sendToPoint(buf);
+      usb->waitForPendingSends();
     }
     if (debug) log_packet(buf);
     if (test) {
@@ -227,6 +327,72 @@ int main(int argc, char **argv) {
       fflush(stdout);
     }
   };
+
+  auto send_built_command = [&](const sanbot::BuiltCommand &built) -> bool {
+    vector<unsigned char> buf(built.bytes.begin(), built.bytes.end());
+    if (!test) {
+      SanbotUsbManager *usb = ensure_manager();
+      if (built.hasRouteTag()) {
+        usb->sendToPoint(buf);
+      } else if (directTarget == "head") {
+        usb->sendToHead(buf);
+      } else if (directTarget == "bottom") {
+        usb->sendToBottom(buf);
+      } else if (directTarget == "both") {
+        usb->sendToHead(buf);
+        usb->sendToBottom(buf);
+      } else {
+        fprintf(stderr,
+                "%s has no database route tag. Pass --target head, bottom, "
+                "or both.\n",
+                built.canonicalName.c_str());
+        return false;
+      }
+      usb->waitForPendingSends();
+    }
+    if (debug) log_packet(buf);
+    if (test) {
+      printf("[TEST] Skipped USB send\n");
+      fflush(stdout);
+    }
+    return true;
+  };
+
+  try {
+    if (cmd == "commands" || cmd == "list-commands" || cmd == "db-list") {
+      auto db = open_database();
+      printCommandList(db);
+      return 0;
+    }
+
+    if (cmd == "describe-command" || cmd == "describe" ||
+        cmd == "db-describe") {
+      if (argc - argi != 2) {
+        printUsage(argv[0]);
+        return 1;
+      }
+      auto db = open_database();
+      printCommandDescription(db.resolveCommand(argv[argi + 1]));
+      return 0;
+    }
+
+    if (cmd == "send-command" || cmd == "db-send" || cmd == "command") {
+      if (argc - argi < 2) {
+        printUsage(argv[0]);
+        return 1;
+      }
+      vector<string> tokens;
+      for (int i = argi + 2; i < argc; ++i)
+        tokens.push_back(argv[i]);
+      auto db = open_database();
+      auto built =
+          db.buildCommand(argv[argi + 1], sanbot::parseCommandArgs(tokens));
+      return send_built_command(built) ? 0 : 1;
+    }
+  } catch (const exception &ex) {
+    fprintf(stderr, "sanbot-mcu-bridge: %s\n", ex.what());
+    return 1;
+  }
 
   if (cmd == "hex-send") {
     if (argc - argi < 2)
@@ -437,6 +603,17 @@ int main(int argc, char **argv) {
   if (cmd == "head-centre") {
     send_packet(buildHeadCentreLock());
     return 0;
+  }
+
+  try {
+    vector<string> tokens;
+    for (int i = argi + 1; i < argc; ++i)
+      tokens.push_back(argv[i]);
+    auto db = open_database();
+    auto built = db.buildCommand(argv[argi], sanbot::parseCommandArgs(tokens));
+    return send_built_command(built) ? 0 : 1;
+  } catch (const exception &ex) {
+    fprintf(stderr, "sanbot-mcu-bridge: %s\n", ex.what());
   }
 
   return 1;

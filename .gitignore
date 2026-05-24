@@ -21,6 +21,3 @@
 **/.ninja_*
 **/build.ninja
 **/rules.ninja
-
-# Local Codex state
-.codex/
