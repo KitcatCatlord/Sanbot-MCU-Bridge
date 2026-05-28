@@ -32,6 +32,20 @@ Use `--db /path/to/sanbot_mcu_commands.sqlite` or
 `SANBOT_MCU_COMMAND_DB=/path/to/sanbot_mcu_commands.sqlite` if the default
 database discovery cannot find the repo-local database.
 
+## CLI install
+
+`core/install.sh` and `core/install-cli.sh` build only the CLI and smoke-test
+binary. They auto-install the required package-manager dependencies where
+possible: `pkg-config`, SQLite3 development headers, and `libusb-1.0`
+development headers.
+
+```sh
+cd core
+./install-cli.sh
+./sanbot-mcu-bridge take-control
+./sanbot-mcu-bridge listen
+```
+
 ## Notes from the dev
 
 The sources for algorithms, addresses and commands are private, since I can't publish them as they're not open source (I pulled it from the firmware such that it's legal for me to reference where necessary but not use or share).

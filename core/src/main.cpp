@@ -3,13 +3,22 @@
 #include "usb-send.h"
 #include <algorithm>
 #include <cctype>
+#include <chrono>
+#include <csignal>
 #include <cstdio>
 #include <exception>
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 using namespace std;
+
+static volatile sig_atomic_t stopRequested = 0;
+
+static void handleSignal(int) {
+  stopRequested = 1;
+}
 
 static string lowerString(string s) {
   transform(s.begin(), s.end(), s.begin(),
@@ -43,6 +52,17 @@ static bool parseU16Value(const string &s, uint16_t &out) {
 
 static void log_packet(const vector<unsigned char> &packet) {
   printf("[VERBOSE] ");
+  for (size_t i = 0; i < packet.size(); ++i) {
+    printf("%02X", packet[i]);
+    if (i + 1 != packet.size())
+      printf(" ");
+  }
+  printf("\n");
+  fflush(stdout);
+}
+
+static void log_received(uint16_t pid, const vector<unsigned char> &packet) {
+  printf("[RECV %04X] ", pid);
   for (size_t i = 0; i < packet.size(); ++i) {
     printf("%02X", packet[i]);
     if (i + 1 != packet.size())
@@ -194,8 +214,10 @@ static void printUsage(const char *argv0) {
           "  %s [--db PATH] describe-command NAME\n"
           "  %s [--db PATH] [--target head|bottom|both] [--debug] [--test] "
           "send-command NAME key=value...\n"
+          "  %s [--test] take-control\n"
+          "  %s [--test] listen [seconds]\n"
           "  %s [--debug] [--test] <legacy-command> ...\n",
-          argv0, argv0, argv0, argv0);
+          argv0, argv0, argv0, argv0, argv0, argv0);
 }
 
 static string defaultDatabasePath(const char *argv0) {
@@ -357,6 +379,73 @@ int main(int argc, char **argv) {
     }
     return true;
   };
+
+  if (cmd == "take-control" || cmd == "claim-usb") {
+    if (argc - argi != 1) {
+      printUsage(argv[0]);
+      return 1;
+    }
+    if (test) {
+      printf("[TEST] Skipped USB control claim\n");
+      return 0;
+    }
+    SanbotUsbManager *usb = ensure_manager();
+    if (!usb->takeControl()) {
+      fprintf(stderr, "sanbot-mcu-bridge: no Sanbot USB endpoints claimed\n");
+      return 1;
+    }
+    printf("Claimed Sanbot USB endpoints\n");
+    return 0;
+  }
+
+  if (cmd == "listen") {
+    if (argc - argi > 2) {
+      printUsage(argv[0]);
+      return 1;
+    }
+    int seconds = 0;
+    if (argc - argi == 2) {
+      try {
+        seconds = stoi(argv[argi + 1], nullptr, 0);
+      } catch (...) {
+        return 1;
+      }
+      if (seconds < 0)
+        return 1;
+    }
+    if (test) {
+      printf("[TEST] Skipped USB listener\n");
+      return 0;
+    }
+
+    signal(SIGINT, handleSignal);
+    signal(SIGTERM, handleSignal);
+
+    SanbotUsbManager *usb = ensure_manager();
+    usb->setListener(log_received);
+    if (!usb->takeControl()) {
+      fprintf(stderr, "sanbot-mcu-bridge: no Sanbot USB endpoints claimed\n");
+      return 1;
+    }
+    usb->startListener();
+    printf("Listening for Sanbot USB packets");
+    if (seconds > 0)
+      printf(" for %d seconds", seconds);
+    printf(". Press Ctrl-C to stop.\n");
+    fflush(stdout);
+
+    auto start = chrono::steady_clock::now();
+    while (!stopRequested) {
+      if (seconds > 0) {
+        auto elapsed = chrono::steady_clock::now() - start;
+        if (chrono::duration_cast<chrono::seconds>(elapsed).count() >= seconds)
+          break;
+      }
+      this_thread::sleep_for(chrono::milliseconds(100));
+    }
+    usb->stopListener();
+    return 0;
+  }
 
   try {
     if (cmd == "commands" || cmd == "list-commands" || cmd == "db-list") {

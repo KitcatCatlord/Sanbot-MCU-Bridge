@@ -5,7 +5,10 @@
 #else
 #include <libusb-1.0/libusb.h>
 #endif
+#include <chrono>
 #include <stdexcept>
+#include <thread>
+#include <utility>
 using namespace std;
 
 SanbotUsbManager::SanbotUsbManager() {
@@ -17,10 +20,12 @@ SanbotUsbManager::SanbotUsbManager() {
 }
 
 SanbotUsbManager::~SanbotUsbManager() {
+    stopListener();
     running = false;
     cv.notify_all();
     queueEmptyCv.notify_all();
     if (worker.joinable()) worker.join();
+    lock_guard<mutex> lock(usbMtx);
     closeDevice(bottom);
     closeDevice(head);
     libusb_exit(ctx);
@@ -44,6 +49,28 @@ void SanbotUsbManager::enqueueMessage(int what, const vector<unsigned char>& dat
     cv.notify_one();
 }
 
+bool SanbotUsbManager::takeControl() {
+    lock_guard<mutex> lock(usbMtx);
+    openDevice(head, PID_HEAD);
+    openDevice(bottom, PID_BOTTOM);
+    return (head.handle && head.outEp != 0) || (bottom.handle && bottom.outEp != 0);
+}
+
+void SanbotUsbManager::setListener(UsbListener callback) {
+    lock_guard<mutex> lock(listenerMtx);
+    listener = std::move(callback);
+}
+
+void SanbotUsbManager::startListener() {
+    if (listening.exchange(true)) return;
+    listenerWorker = thread(&SanbotUsbManager::listenLoop, this);
+}
+
+void SanbotUsbManager::stopListener() {
+    if (!listening.exchange(false)) return;
+    if (listenerWorker.joinable()) listenerWorker.join();
+}
+
 void SanbotUsbManager::sendLoop() {
     while (true) {
         Message msg;
@@ -54,6 +81,7 @@ void SanbotUsbManager::sendLoop() {
             if (msgQueue.empty()) continue;
             msg = msgQueue.front();
             msgQueue.pop();
+            activeMessages++;
         }
 
         switch (msg.what) {
@@ -72,7 +100,8 @@ void SanbotUsbManager::sendLoop() {
 
         {
             lock_guard<mutex> lock(mtx);
-            if (msgQueue.empty()) notifyIdle();
+            if (activeMessages > 0) activeMessages--;
+            if (msgQueue.empty() && activeMessages == 0) notifyIdle();
         }
     }
 }
@@ -101,6 +130,7 @@ void SanbotUsbManager::handlePointMessage(const vector<unsigned char>& buffers) 
 void SanbotUsbManager::sendBufferTo(EndpointSet& dev, uint16_t pid, const vector<unsigned char>& buf) {
     if (buf.empty()) return;
 
+    lock_guard<mutex> lock(usbMtx);
     if (!dev.handle || dev.outEp == 0) {
         openDevice(dev, pid);
     }
@@ -133,6 +163,66 @@ void SanbotUsbManager::sendBufferTo(EndpointSet& dev, uint16_t pid, const vector
     } else {
         dev.failCount = 0;
     }
+}
+
+void SanbotUsbManager::listenLoop() {
+    while (listening) {
+        bool received = false;
+        {
+            lock_guard<mutex> lock(usbMtx);
+            received = pollEndpoint(head, PID_HEAD) || received;
+            received = pollEndpoint(bottom, PID_BOTTOM) || received;
+        }
+        if (!received) {
+            this_thread::sleep_for(chrono::milliseconds(5));
+        }
+    }
+}
+
+bool SanbotUsbManager::pollEndpoint(EndpointSet& dev, uint16_t pid) {
+    if (!dev.handle || dev.inEp == 0) {
+        openDevice(dev, pid);
+    }
+    if (!dev.handle || dev.inEp == 0) {
+        return false;
+    }
+
+    vector<unsigned char> buf(512);
+    int transferred = 0;
+    int r = libusb_bulk_transfer(
+        dev.handle,
+        dev.inEp,
+        buf.data(),
+        static_cast<int>(buf.size()),
+        &transferred,
+        25
+    );
+
+    if (r == LIBUSB_ERROR_TIMEOUT || transferred <= 0) {
+        return false;
+    }
+
+    if (r < 0) {
+        dev.failCount++;
+        if (dev.failCount % 10 == 0) {
+            closeDevice(dev);
+            openDevice(dev, pid);
+        }
+        return false;
+    }
+
+    dev.failCount = 0;
+    buf.resize(static_cast<size_t>(transferred));
+
+    UsbListener callback;
+    {
+        lock_guard<mutex> lock(listenerMtx);
+        callback = listener;
+    }
+    if (callback) {
+        callback(pid, buf);
+    }
+    return true;
 }
 
 void SanbotUsbManager::openDevice(EndpointSet& dev, uint16_t pid) {
@@ -177,16 +267,14 @@ void SanbotUsbManager::openDevice(EndpointSet& dev, uint16_t pid) {
                     }
                 }
                 if (outEp != 0) {
-                    int kd = libusb_kernel_driver_active(handle, ifdesc.bInterfaceNumber);
-                    if (kd == 1) {
-                        libusb_detach_kernel_driver(handle, ifdesc.bInterfaceNumber);
-                    }
-                    if (libusb_claim_interface(handle, ifdesc.bInterfaceNumber) == 0) {
+                    if (claimInterface(handle, ifdesc.bInterfaceNumber)) {
                         dev.handle = handle;
                         dev.outEp = outEp;
                         dev.inEp = inEp;
                         dev.iface = ifdesc.bInterfaceNumber;
                         dev.failCount = 0;
+                        libusb_clear_halt(handle, outEp);
+                        if (inEp != 0) libusb_clear_halt(handle, inEp);
                         found = true;
                     }
                 }
@@ -203,6 +291,27 @@ void SanbotUsbManager::openDevice(EndpointSet& dev, uint16_t pid) {
     }
 
     libusb_free_device_list(list, 1);
+}
+
+bool SanbotUsbManager::claimInterface(libusb_device_handle* handle, int iface) {
+    int active = libusb_kernel_driver_active(handle, iface);
+    if (active == 1) {
+        libusb_detach_kernel_driver(handle, iface);
+    }
+
+    int rc = libusb_claim_interface(handle, iface);
+    if (rc == 0) return true;
+
+    if (rc == LIBUSB_ERROR_BUSY) {
+        libusb_detach_kernel_driver(handle, iface);
+        rc = libusb_claim_interface(handle, iface);
+        if (rc == 0) return true;
+
+        libusb_reset_device(handle);
+        rc = libusb_claim_interface(handle, iface);
+    }
+
+    return rc == 0;
 }
 
 void SanbotUsbManager::closeDevice(EndpointSet& dev) {
@@ -225,5 +334,5 @@ void SanbotUsbManager::notifyIdle() {
 
 void SanbotUsbManager::waitForPendingSends() {
     unique_lock<mutex> lock(mtx);
-    queueEmptyCv.wait(lock, [&] { return msgQueue.empty(); });
+    queueEmptyCv.wait(lock, [&] { return msgQueue.empty() && activeMessages == 0; });
 }
