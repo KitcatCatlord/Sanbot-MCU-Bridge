@@ -210,6 +210,8 @@ static bool parseHeadDirection(const string &s, uint8_t &out) {
 static void printUsage(const char *argv0) {
   fprintf(stderr,
           "Usage:\n"
+          "  %s help\n"
+          "  %s examples\n"
           "  %s [--db PATH] [--debug] [--test] commands\n"
           "  %s [--db PATH] describe-command NAME\n"
           "  %s [--db PATH] [--target head|bottom|both] [--debug] [--test] "
@@ -217,7 +219,67 @@ static void printUsage(const char *argv0) {
           "  %s [--test] take-control\n"
           "  %s [--test] listen [seconds]\n"
           "  %s [--debug] [--test] <legacy-command> ...\n",
-          argv0, argv0, argv0, argv0, argv0, argv0);
+          argv0, argv0, argv0, argv0, argv0, argv0, argv0, argv0);
+}
+
+static void printExamples(const char *argv0) {
+  printf("Quick commands:\n");
+  printf("  %s commands\n", argv0);
+  printf("  %s describe-command wheel\n", argv0);
+  printf("  %s --test --debug send-command wheel mode=distance "
+         "direction=forward speed=50 distance=1000\n",
+         argv0);
+  printf("  %s take-control\n", argv0);
+  printf("  %s listen\n", argv0);
+  printf("\n");
+
+  printf("Where commands come from:\n");
+  printf("  The command catalogue is loaded from "
+         "mcu-command-database/sanbot_mcu_commands.sqlite.\n");
+  printf("  Use commands to list names and describe-command NAME to see "
+         "accepted fields.\n");
+  printf("  Override the database with --db PATH or SANBOT_MCU_COMMAND_DB.\n");
+  printf("\n");
+
+  printf("Locomotion examples:\n");
+  printf("  %s send-command wheel mode=distance direction=forward "
+         "speed=50 distance=1000\n",
+         argv0);
+  printf("  %s send-command wheel mode=relative direction=left speed=40 "
+         "angle=90\n",
+         argv0);
+  printf("  %s send-command wheel mode=timed direction=turn-left "
+         "time=1000 degree=90\n",
+         argv0);
+  printf("  %s send-command wheel mode=no-angle "
+         "direction=right-translation speed=40 time=1000 isCircle=0\n",
+         argv0);
+  printf("  %s send-command wheel mode=no-angle direction=stop speed=0 "
+         "time=0 isCircle=0\n",
+         argv0);
+  printf("\n");
+
+  printf("Light examples:\n");
+  printf("  %s send-command LEDLightCommand whichLight=1 switchMode=on "
+         "led_rate=5 led_random_number=0\n",
+         argv0);
+  printf("  %s send-command WhiteLightCommand switchMode=on\n", argv0);
+  printf("  %s send-command SetWhiteBrightness setWhiteBrightness=1 "
+         "brightness=80\n",
+         argv0);
+  printf("  %s send-command QueryWhiteBrightness queryWhiteBrightness=1\n",
+         argv0);
+  printf("\n");
+
+  printf("Battery examples:\n");
+  printf("  %s send-command QueryBatteryCommand battery=0 "
+         "currentBattery=0\n",
+         argv0);
+  printf("  %s send-command BatteryTemperatureCommand temperature=0\n",
+         argv0);
+  printf("  %s send-command AutoBatteryCommand switchMode=on threshold=20\n",
+         argv0);
+  printf("  %s send-command AutoBatteryCommand switchMode=off\n", argv0);
 }
 
 static string defaultDatabasePath(const char *argv0) {
@@ -324,6 +386,18 @@ int main(int argc, char **argv) {
 
   string cmd = lowerString(argv[argi]);
   unique_ptr<SanbotUsbManager> manager;
+
+  if (cmd == "help") {
+    printUsage(argv[0]);
+    printf("\n");
+    printExamples(argv[0]);
+    return 0;
+  }
+
+  if (cmd == "examples" || cmd == "quickstart") {
+    printExamples(argv[0]);
+    return 0;
+  }
 
   auto open_database = [&]() {
     return sanbot::CommandDatabase(
